@@ -8,10 +8,12 @@
 
 ## 最上位の制約
 
-- 個人情報の永続保存先は、職場PC Googleアカウントが所有するGoogle Drive上の非共有Google Sheetsだけとする。
+- 個人情報の永続保存先は、原則として職場PC Googleアカウントが所有するGoogle Drive上の非共有Google Sheetsだけとする。
+- 例外として、ADMINが明示操作したML用CSVだけは、直接識別子を除外し監査記録を残したうえで利用者端末へ保存できる。
 - PDF本体はブラウザ内で一時的に解析し、Cloudflare、GitHub、GAS、Google Driveへ保存しない。
 - GitHubへ実PDF、実成績、仕様書本体、画面キャプチャ、ログ、エクスポートを置かない。
 - Cloudflareは静的配信と一時的なAPI中継に限定し、個人情報をKV、D1、R2、Cache、ログ等へ保存しない。
+- 情報損失なく復元検証できる場合、設問別成績等を版管理されたJSONとしてGoogle Sheetsセルへ正本保存できる。
 - INPUTは登録のみ、ADMINは全データ閲覧・分析を可能とする。
 - 未知または検証不合格のPDFは登録しない。
 
