@@ -97,7 +97,7 @@ Phase 1完了時には、Lunaが推測せずに、合成データ型、Parser契
 | 帳票・試作ギャップ分析 | 初版作成済み |
 | 分析要件カタログ | 初版作成済み |
 | 正本データモデル | 初版作成済み |
-| TypeScriptデータ契約 | 未実装 |
+| TypeScriptデータ契約 | 初版実装・契約テスト済み |
 | JSON比較ベンチマーク | 未実装 |
 | 合成fixture生成器 | 未実装 |
 | Parser detect/extract/validate/normalize骨格 | 未実装 |

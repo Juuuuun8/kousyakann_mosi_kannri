@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kousyakann-mosi-kannri.invalid/schema/payload-json.v1.json",
+  "title": "PayloadJson",
+  "oneOf": [
+    { "$ref": "#/$defs/answerMarks" },
+    { "$ref": "#/$defs/domainResults" },
+    { "$ref": "#/$defs/trend" },
+    { "$ref": "#/$defs/targets" },
+    { "$ref": "#/$defs/narrative" },
+    { "$ref": "#/$defs/rawLabels" }
+  ],
+  "$defs": {
+    "nullableNumber": { "type": ["number", "null"] },
+    "nullableString": { "type": ["string", "null"] },
+    "missingReason": { "type": ["string", "null"], "enum": ["NOT_APPLICABLE", "NOT_TAKEN", "NOT_PRINTED", "BLANK_ON_REPORT", "UNREADABLE", "PARSER_ERROR", "UNKNOWN_CODE", "REDACTED", null] },
+    "answerMarks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["v", "type", "subject", "items"],
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "answer_marks" },
+        "subject": { "type": "string", "minLength": 1 },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              { "type": ["integer", "null"], "minimum": 1 },
+              { "type": "string", "minLength": 1 },
+              { "$ref": "#/$defs/nullableString" },
+              { "type": ["string", "null"], "enum": ["CORRECT", "WRONG", "PARTIAL", "UNDETERMINED", "NO_ANSWER", "EXTRA_MARK", null] },
+              { "$ref": "#/$defs/nullableString" },
+              { "$ref": "#/$defs/missingReason" }
+            ],
+            "items": false,
+            "minItems": 6,
+            "maxItems": 6
+          }
+        }
+      }
+    },
+    "domainResults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["v", "type", "subject", "items"],
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "domain_results" },
+        "subject": { "type": "string", "minLength": 1 },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["domainRaw", "domainId", "score", "maxScore", "nationalAverage", "schoolAverage", "sameAbilityAverage", "scoreRateDifference", "evaluationCodeRaw", "nextLevelAverage", "commentaryRaw", "missingReason"],
+            "properties": {
+              "domainRaw": { "type": "string", "minLength": 1 },
+              "domainId": { "$ref": "#/$defs/nullableString" },
+              "score": { "$ref": "#/$defs/nullableNumber" },
+              "maxScore": { "$ref": "#/$defs/nullableNumber" },
+              "nationalAverage": { "$ref": "#/$defs/nullableNumber" },
+              "schoolAverage": { "$ref": "#/$defs/nullableNumber" },
+              "sameAbilityAverage": { "$ref": "#/$defs/nullableNumber" },
+              "scoreRateDifference": { "$ref": "#/$defs/nullableNumber" },
+              "evaluationCodeRaw": { "$ref": "#/$defs/nullableString" },
+              "nextLevelAverage": { "$ref": "#/$defs/nullableNumber" },
+              "commentaryRaw": { "$ref": "#/$defs/nullableString" },
+              "missingReason": { "$ref": "#/$defs/missingReason" }
+            }
+          }
+        }
+      }
+    },
+    "trend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["v", "type", "items"],
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "trend" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["examEventIdRaw", "examEventId", "subjectRaw", "subjectDefinitionId", "score", "deviation", "abilityLevel", "missingReason"],
+            "properties": {
+              "examEventIdRaw": { "type": "string", "minLength": 1 },
+              "examEventId": { "$ref": "#/$defs/nullableString" },
+              "subjectRaw": { "type": "string", "minLength": 1 },
+              "subjectDefinitionId": { "$ref": "#/$defs/nullableString" },
+              "score": { "$ref": "#/$defs/nullableNumber" },
+              "deviation": { "$ref": "#/$defs/nullableNumber" },
+              "abilityLevel": { "type": ["string", "null"], "enum": ["S", "A", "B", "C", "D", "E", "F", null] },
+              "missingReason": { "$ref": "#/$defs/missingReason" }
+            }
+          }
+        }
+      }
+    },
+    "targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["v", "type", "items"],
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "targets" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["preferenceOrder", "scheduleRaw", "universityRaw", "facultyRaw", "departmentMethodRaw", "universityId", "judgementRaw", "scoreOrDeviation", "fullScore", "borderScore", "firstChoiceRank", "firstChoicePopulation", "totalRank", "totalPopulation", "capacity", "missingReason"],
+            "properties": {
+              "preferenceOrder": { "type": "integer", "minimum": 1 },
+              "scheduleRaw": { "$ref": "#/$defs/nullableString" },
+              "universityRaw": { "$ref": "#/$defs/nullableString" },
+              "facultyRaw": { "$ref": "#/$defs/nullableString" },
+              "departmentMethodRaw": { "$ref": "#/$defs/nullableString" },
+              "universityId": { "$ref": "#/$defs/nullableString" },
+              "judgementRaw": { "$ref": "#/$defs/nullableString" },
+              "scoreOrDeviation": { "$ref": "#/$defs/nullableNumber" },
+              "fullScore": { "$ref": "#/$defs/nullableNumber" },
+              "borderScore": { "$ref": "#/$defs/nullableNumber" },
+              "firstChoiceRank": { "$ref": "#/$defs/nullableNumber" },
+              "firstChoicePopulation": { "$ref": "#/$defs/nullableNumber" },
+              "totalRank": { "$ref": "#/$defs/nullableNumber" },
+              "totalPopulation": { "$ref": "#/$defs/nullableNumber" },
+              "capacity": { "$ref": "#/$defs/nullableNumber" },
+              "missingReason": { "$ref": "#/$defs/missingReason" }
+            }
+          }
+        }
+      }
+    },
+    "narrative": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["v", "type", "items"],
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "narrative" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["section", "subjectRaw", "textRaw"],
+            "properties": {
+              "section": { "type": "string", "minLength": 1 },
+              "subjectRaw": { "$ref": "#/$defs/nullableString" },
+              "textRaw": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "rawLabels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["v", "type", "items"],
+      "properties": {
+        "v": { "const": 1 },
+        "type": { "const": "raw_labels" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["field", "page", "labelRaw", "valueRaw"],
+            "properties": {
+              "field": { "type": "string", "minLength": 1 },
+              "page": { "type": "integer", "minimum": 1 },
+              "labelRaw": { "type": "string", "minLength": 1 },
+              "valueRaw": { "$ref": "#/$defs/nullableString" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

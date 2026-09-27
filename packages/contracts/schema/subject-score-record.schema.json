@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kousyakann-mosi-kannri.invalid/schema/subject-score-record.v1.json",
+  "title": "SubjectScoreRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "recordId", "reportId", "subjectDefinitionId", "metricDefinitionId", "score", "maxScore", "scoreRate",
+    "deviation", "abilityLevel", "nationalAverage", "nationalRank", "nationalPopulation", "currentStudentAverage",
+    "graduateAverage", "currentRank", "currentPopulation", "schoolDeviation", "schoolAverage", "schoolRank",
+    "schoolPopulation", "missingReason", "sourceLabelRaw", "valueHash", "schemaVersionId", "parserVersion",
+    "normalizationVersion"
+  ],
+  "properties": {
+    "recordId": { "$ref": "#/$defs/uuid" },
+    "reportId": { "$ref": "#/$defs/uuid" },
+    "subjectDefinitionId": { "$ref": "#/$defs/identifier" },
+    "metricDefinitionId": { "$ref": "#/$defs/identifier" },
+    "score": { "$ref": "#/$defs/numberOrNull" },
+    "maxScore": { "$ref": "#/$defs/numberOrNull" },
+    "scoreRate": { "$ref": "#/$defs/numberOrNull" },
+    "deviation": { "$ref": "#/$defs/numberOrNull" },
+    "abilityLevel": { "type": ["string", "null"], "enum": ["S", "A", "B", "C", "D", "E", "F", null] },
+    "nationalAverage": { "$ref": "#/$defs/numberOrNull" },
+    "nationalRank": { "$ref": "#/$defs/numberOrNull" },
+    "nationalPopulation": { "$ref": "#/$defs/numberOrNull" },
+    "currentStudentAverage": { "$ref": "#/$defs/numberOrNull" },
+    "graduateAverage": { "$ref": "#/$defs/numberOrNull" },
+    "currentRank": { "$ref": "#/$defs/numberOrNull" },
+    "currentPopulation": { "$ref": "#/$defs/numberOrNull" },
+    "schoolDeviation": { "$ref": "#/$defs/numberOrNull" },
+    "schoolAverage": { "$ref": "#/$defs/numberOrNull" },
+    "schoolRank": { "$ref": "#/$defs/numberOrNull" },
+    "schoolPopulation": { "$ref": "#/$defs/numberOrNull" },
+    "missingReason": { "type": ["string", "null"], "enum": ["NOT_APPLICABLE", "NOT_TAKEN", "NOT_PRINTED", "BLANK_ON_REPORT", "UNREADABLE", "PARSER_ERROR", "UNKNOWN_CODE", "REDACTED", null] },
+    "sourceLabelRaw": { "type": ["string", "null"] },
+    "valueHash": { "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
+    "schemaVersionId": { "$ref": "#/$defs/identifier" },
+    "parserVersion": { "type": "string", "minLength": 1 },
+    "normalizationVersion": { "type": "string", "minLength": 1 }
+  },
+  "$defs": {
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "identifier": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "numberOrNull": { "type": ["number", "null"] }
+  }
+}

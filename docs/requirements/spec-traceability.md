@@ -22,11 +22,11 @@
 | REQ-OTP-001 | 6.1, 9.1 | ACTIVE利用者だけへOTPを送る | traceability.md | 認証試験 |
 | REQ-SESSION-001 | 6.2, 9.2 | セッションIDをHttpOnly Secure SameSite Strict Cookieに置く | privacy-boundary.md | Cookie試験 |
 | REQ-SESSION-002 | 新規制約 | 利用者と結び付くOTP・セッション状態を所定のGoogle Sheets以外へ保存しない | privacy-boundary.md, SPEC-CHANGE-002 | 保存先監査 |
-| REQ-PARSER-001 | 6.3, 7.1 | Parserをdetect extract validate normalizeに分離する | phase-plan | 契約試験 |
-| REQ-PARSER-002 | 7.1 | ParserVersionを成績レコードへ保存する | traceability.md | 保存試験 |
+| REQ-PARSER-001 | 6.3, 7.1 | Parserをdetect extract validate normalizeに分離する | phase-plan, packages/contracts | 契約試験 |
+| REQ-PARSER-002 | 7.1 | ParserVersionを成績レコードへ保存する | packages/contracts | 保存試験 |
 | REQ-PARSER-003 | 6.3, 7.1 | 未知スキームをfail-closedで拒否する | traceability.md | 未知PDF試験 |
 | REQ-PARSER-004 | 6.12 | 新旧スキームの回帰試験を行う | phase-plan | ゴールデンテスト |
-| REQ-DATA-001 | 6.4, 8.3 | RecordID、ImportedBy、ImportedAt、ParserVersion、PdfHash等を保存する | traceability.md | 列・保存試験 |
+| REQ-DATA-001 | 6.4, 8.3 | RecordID、ImportedBy、ImportedAt、ParserVersion、PdfHash等を保存する | packages/contracts | 列・保存試験 |
 | REQ-DATA-002 | 6.4 | 保存先Spreadsheet IDをクライアントから受け取らない | privacy-boundary.md | 改ざん試験 |
 | REQ-DATA-003 | 6.9 | 訂正は履歴を保持し元レコードを通常削除しない | traceability.md | 訂正試験 |
 | REQ-DATA-004 | 6.10, 8.2 | 年度と容量に応じてGASが保存先を自動作成・分割する | traceability.md | 分割試験 |
@@ -37,10 +37,10 @@
 | REQ-EXPORT-001 | 6.7 | ML出力から氏名・メール等を除外する | privacy-boundary.md | 出力列試験 |
 | REQ-EXPORT-002 | 6.7 | ML_IDを匿名化ではなく仮名化として扱う | privacy-boundary.md | 文言・運用監査 |
 | REQ-EXPORT-003 | 承認済み例外 | ADMINの明示操作に限り直接識別子除外済みML用CSVを端末へ保存できる | privacy-boundary.md, SPEC-CHANGE-001 | 権限・出力列・監査試験 |
-| REQ-DATA-007 | 承認済み方針 | 情報損失なく復元検証できる高密度データは版管理JSONとしてGoogle Sheetsセルへ正本保存できる | privacy-boundary.md, SPEC-CHANGE-004 | 復元・ハッシュ・上限試験 |
-| REQ-DATA-008 | 8.3、17およびユーザー前提 | 既存社内生徒IDがないためシステム生成PersonIDを用い、受験番号を長期IDにしない | canonical-data-model.md | 本人照合・衝突試験 |
-| REQ-DATA-009 | 7.2および承認済み方針 | 未受験、非掲載、帳票空欄、解析不能をMissingReasonで区別する | canonical-data-model.md | 欠損意味試験 |
-| REQ-DATA-010 | 7、8 | 原表記を保持したまま正規化値と各Versionを保存する | canonical-data-model.md | round-trip試験 |
+| REQ-DATA-007 | 承認済み方針 | 情報損失なく復元検証できる高密度データは版管理JSONとしてGoogle Sheetsセルへ正本保存できる | privacy-boundary.md, SPEC-CHANGE-004, packages/contracts | 復元・ハッシュ・上限試験 |
+| REQ-DATA-008 | 8.3、17およびユーザー前提 | 既存社内生徒IDがないためシステム生成PersonIDを用い、受験番号を長期IDにしない | canonical-data-model.md, packages/contracts | 本人照合・衝突試験 |
+| REQ-DATA-009 | 7.2および承認済み方針 | 未受験、非掲載、帳票空欄、解析不能をMissingReasonで区別する | canonical-data-model.md, packages/contracts | 欠損意味試験 |
+| REQ-DATA-010 | 7、8 | 原表記を保持したまま正規化値と各Versionを保存する | canonical-data-model.md, packages/contracts | round-trip試験 |
 | REQ-ANALYSIS-003 | ユーザー要件 | 校舎、学校、志望校、科目、個人、回次で比較・推移分析できる | analysis-catalog.md | 指標・フィルタ試験 |
 | REQ-ANALYSIS-004 | 6.6、10.2 | 集計へ対象人数、除外数、欠損理由を付け、小人数群を抑制可能にする | analysis-catalog.md | 母数・抑制試験 |
 | REQ-LOG-001 | 11.1 | 成功・失敗・操作種別・RequestIDを監査記録する | privacy-boundary.md | ログ試験 |

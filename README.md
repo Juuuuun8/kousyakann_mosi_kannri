@@ -24,6 +24,7 @@
 - [河合塾帳票と既存試作のギャップ分析](docs/reviews/kawai-sample-and-prototype-gap-analysis.md)
 - [分析要件カタログ](docs/design/analysis-catalog.md)
 - [Google Sheets正本データモデル案](docs/design/canonical-data-model.md)
+- [P1-T04 TypeScriptデータ契約](docs/tasks/P1-T04-type-contract.md)
 - [個人情報の保存境界](docs/security/privacy-boundary.md)
 - [仕様トレーサビリティ](docs/requirements/spec-traceability.md)
 - [仕様変更提案](docs/changes/spec-change-proposals.md)

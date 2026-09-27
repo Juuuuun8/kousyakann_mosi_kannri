@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kousyakann-mosi-kannri.invalid/schema/report-record.v1.json",
+  "title": "ReportRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reportId", "status", "locationId", "examEventId", "personId", "identityStatus",
+    "examCandidateId", "schoolCodeRaw", "schoolNameRaw", "gradeRaw", "classRaw", "localNumberRaw",
+    "studentNameKanaRaw", "schemaVersionId", "parserVersion", "normalizationVersion", "pdfHash",
+    "semanticFingerprint", "pageCount", "subjectCount", "payloadCount", "importedAt", "importedBy",
+    "supersedesReportId"
+  ],
+  "properties": {
+    "reportId": { "$ref": "#/$defs/uuid" },
+    "status": { "enum": ["PENDING", "ACTIVE", "SUPERSEDED", "REJECTED"] },
+    "locationId": { "$ref": "#/$defs/identifier" },
+    "examEventId": { "$ref": "#/$defs/identifier" },
+    "personId": { "anyOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] },
+    "identityStatus": { "enum": ["RESOLVED", "NEW_CONFIRMED", "AMBIGUOUS", "UNRESOLVED"] },
+    "examCandidateId": { "type": ["string", "null"] },
+    "schoolCodeRaw": { "type": ["string", "null"] },
+    "schoolNameRaw": { "type": ["string", "null"] },
+    "gradeRaw": { "type": ["string", "null"] },
+    "classRaw": { "type": ["string", "null"] },
+    "localNumberRaw": { "type": ["string", "null"] },
+    "studentNameKanaRaw": { "type": ["string", "null"] },
+    "schemaVersionId": { "$ref": "#/$defs/identifier" },
+    "parserVersion": { "type": "string", "minLength": 1 },
+    "normalizationVersion": { "type": "string", "minLength": 1 },
+    "pdfHash": { "$ref": "#/$defs/sha256" },
+    "semanticFingerprint": { "$ref": "#/$defs/sha256" },
+    "pageCount": { "type": "integer", "minimum": 1 },
+    "subjectCount": { "type": "integer", "minimum": 0 },
+    "payloadCount": { "type": "integer", "minimum": 0 },
+    "importedAt": { "$ref": "#/$defs/isoDateTime" },
+    "importedBy": { "type": "string", "minLength": 3, "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$" },
+    "supersedesReportId": { "anyOf": [{ "$ref": "#/$defs/uuid" }, { "type": "null" }] }
+  },
+  "$defs": {
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "identifier": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "isoDateTime": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$" }
+  }
+}

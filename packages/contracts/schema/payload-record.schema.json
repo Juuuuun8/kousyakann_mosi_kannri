@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kousyakann-mosi-kannri.invalid/schema/payload-record.v1.json",
+  "title": "PayloadRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["payloadId", "reportId", "payloadType", "subjectDefinitionId", "payloadFormatVersion", "chunkIndex", "chunkCount", "itemCount", "payloadHash", "chunkHash", "jsonText", "createdAt"],
+  "properties": {
+    "payloadId": { "$ref": "#/$defs/uuid" },
+    "reportId": { "$ref": "#/$defs/uuid" },
+    "payloadType": { "enum": ["TREND", "DOMAIN", "ANSWER_MARKS", "TARGETS", "NARRATIVE", "RAW_LABELS"] },
+    "subjectDefinitionId": { "anyOf": [{ "$ref": "#/$defs/identifier" }, { "type": "null" }] },
+    "payloadFormatVersion": { "type": "string", "minLength": 1 },
+    "chunkIndex": { "type": "integer", "minimum": 0 },
+    "chunkCount": { "type": "integer", "minimum": 1 },
+    "itemCount": { "type": "integer", "minimum": 0 },
+    "payloadHash": { "$ref": "#/$defs/sha256" },
+    "chunkHash": { "$ref": "#/$defs/sha256" },
+    "jsonText": { "type": "string", "minLength": 2, "maxLength": 40000 },
+    "createdAt": { "$ref": "#/$defs/isoDateTime" }
+  },
+  "$defs": {
+    "uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "identifier": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$" },
+    "isoDateTime": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$" }
+  }
+}
