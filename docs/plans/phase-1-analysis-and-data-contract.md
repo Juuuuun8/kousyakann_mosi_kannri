@@ -98,11 +98,17 @@ Phase 1完了時には、Lunaが推測せずに、合成データ型、Parser契
 | 分析要件カタログ | 初版作成済み |
 | 正本データモデル | 初版作成済み |
 | TypeScriptデータ契約 | 初版実装・契約テスト済み |
-| JSON比較ベンチマーク | 未実装 |
-| 合成fixture生成器 | 未実装 |
-| Parser detect/extract/validate/normalize骨格 | 未実装 |
-| 分析ワイヤーフレーム | データ契約確定後 |
-| Phase 1決定記録 | 未作成 |
+| JSON比較ベンチマーク | 初版実装・合成データで検証済み |
+| 合成fixture生成器 | 初版実装・契約テスト済み |
+| JSON codecと完全復元 | 初版実装・チャンク整合性テスト済み |
+| 分析クエリ契約 | 初版実装・抑制結果テスト済み |
+| ML CSV契約 | 初版実装・列除外・数式注入対策テスト済み |
+| PIIスキャン | 初版実装・ローカル検査済み。CI・履歴監査は継続 |
+| 合成UIワイヤーフレーム | 初版実装・状態表示の静的テスト済み |
+| Parser detect/extract/validate/normalize骨格 | 初版実装・fail-closed契約テスト済み |
+| 河合塾Schema初版 | 合成4ページで骨格検証済み。実項目抽出は継続 |
+| 分析ワイヤーフレーム | 合成UI初版実装。API結合・アクセシビリティは継続 |
+| Phase 1決定記録 | 初期決定記録を作成。会社レビュー待ち |
 
 ## 10 不変条件
 
@@ -172,16 +178,16 @@ Phase 1完了時には、Lunaが推測せずに、合成データ型、Parser契
 | P1-T02 | 分析要件確定 | analysis catalog | P1-T01 | 指標、母数、除外、優先度が定義済み |
 | P1-T03 | ID・欠損・状態モデル確定 | canonical data model | P1-T01-02 | 未決事項以外が一意に解釈可能 |
 | P1-T04 | TypeScript契約作成 | packages/contracts | P1-T03 | 型・enum・JSON Schemaが一致 |
-| P1-T05 | 合成データ生成器 | packages/test-fixtures | P1-T04 | 実人物由来でない境界fixtureを生成 |
-| P1-T06 | Sheet方式比較 | benchmark report | P1-T04-05 | 行/JSONのセル数・時間・可逆性を測定 |
-| P1-T07 | JSON codecと整合性試験 | packages/payload-codec | P1-T06 | 完全一致、チャンク、ハッシュ試験合格 |
-| P1-T08 | Parser骨格 | packages/parsers/core | P1-T04-05 | 4段階APIとfail-closed試験合格 |
-| P1-T09 | 河合塾Schema定義 | packages/parsers/kawai | P1-T08 | 合成4ページfixtureで期待値一致 |
-| P1-T10 | 分析クエリ契約 | packages/analytics-contracts | P1-T02-04 | フィルタ・指標・抑制結果型が固定 |
-| P1-T11 | ML CSV契約 | packages/export-contracts | P1-T03-04 | 列・型・欠損・除外・版が固定 |
-| P1-T12 | 合成UIワイヤーフレーム | frontend prototype | P1-T02-10 | P0画面と例外状態を確認可能 |
+| P1-T05 | 合成データ生成器 | packages/test-fixtures | P1-T04 | 実人物由来でない境界fixtureを生成。完了 |
+| P1-T06 | Sheet方式比較 | benchmark report | P1-T04-05 | 行/JSONのセル数・文字数・可逆性を測定。完了 |
+| P1-T07 | JSON codecと整合性試験 | packages/payload-codec | P1-T06 | 完全一致、チャンク、整合性試験合格。完了 |
+| P1-T08 | Parser骨格 | packages/parsers/core | P1-T04-05 | 4段階APIとfail-closed試験合格。初版完了 |
+| P1-T09 | 河合塾Schema定義 | packages/parsers/kawai | P1-T08 | 合成4ページfixtureでマーカー・ページ集合一致。実項目抽出は継続 |
+| P1-T10 | 分析クエリ契約 | packages/analytics-contracts | P1-T02-04 | フィルタ・指標・抑制結果型が固定。完了 |
+| P1-T11 | ML CSV契約 | packages/export-contracts | P1-T03-04 | 列・型・欠損・除外・版が固定。完了 |
+| P1-T12 | 合成UIワイヤーフレーム | frontend prototype | P1-T02-10 | P0画面と例外状態を確認可能。初版完了 |
 | P1-T13 | セキュリティ・PII検査 | scripts/CI | P1-T04-12 | 実データ・禁止API・ログを検知 |
-| P1-T14 | Phase 1決定レビュー | ADR、受入記録 | 全タスク | 未決事項が次フェーズへ明示される |
+| P1-T14 | Phase 1決定レビュー | ADR、受入記録 | 全タスク | 初期決定記録と未決事項を作成。正式レビュー待ち |
 
 P1-T04以降は、上位文書の未決事項が解消し、個別LunaタスクがDefinition of Readyを満たしてから実装する。
 

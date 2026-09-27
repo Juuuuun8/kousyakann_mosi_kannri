@@ -1,0 +1,9 @@
+{
+  "name": "@kousyakann-mosi-kannri/test-fixtures",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-strip-types --test test/fixtures.test.mjs"
+  }
+}
