@@ -38,6 +38,11 @@
 | REQ-EXPORT-002 | 6.7 | ML_IDを匿名化ではなく仮名化として扱う | privacy-boundary.md | 文言・運用監査 |
 | REQ-EXPORT-003 | 承認済み例外 | ADMINの明示操作に限り直接識別子除外済みML用CSVを端末へ保存できる | privacy-boundary.md, SPEC-CHANGE-001 | 権限・出力列・監査試験 |
 | REQ-DATA-007 | 承認済み方針 | 情報損失なく復元検証できる高密度データは版管理JSONとしてGoogle Sheetsセルへ正本保存できる | privacy-boundary.md, SPEC-CHANGE-004 | 復元・ハッシュ・上限試験 |
+| REQ-DATA-008 | 8.3、17およびユーザー前提 | 既存社内生徒IDがないためシステム生成PersonIDを用い、受験番号を長期IDにしない | canonical-data-model.md | 本人照合・衝突試験 |
+| REQ-DATA-009 | 7.2および承認済み方針 | 未受験、非掲載、帳票空欄、解析不能をMissingReasonで区別する | canonical-data-model.md | 欠損意味試験 |
+| REQ-DATA-010 | 7、8 | 原表記を保持したまま正規化値と各Versionを保存する | canonical-data-model.md | round-trip試験 |
+| REQ-ANALYSIS-003 | ユーザー要件 | 校舎、学校、志望校、科目、個人、回次で比較・推移分析できる | analysis-catalog.md | 指標・フィルタ試験 |
+| REQ-ANALYSIS-004 | 6.6、10.2 | 集計へ対象人数、除外数、欠損理由を付け、小人数群を抑制可能にする | analysis-catalog.md | 母数・抑制試験 |
 | REQ-LOG-001 | 11.1 | 成功・失敗・操作種別・RequestIDを監査記録する | privacy-boundary.md | ログ試験 |
 | REQ-LOG-002 | 6.1, 11.1 | OTP、セッションID、Secret、PDF本文をログへ出さない | privacy-boundary.md | 禁止値試験 |
 | REQ-BACKUP-001 | 6.11, 11.2 | Drive内で定期バックアップし世代管理する | traceability.md | バックアップ試験 |

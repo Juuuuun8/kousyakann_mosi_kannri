@@ -4,7 +4,7 @@
 
 ## 現在の状態
 
-会社承認前の設計・準備段階です。本番GAS、職場Google Drive、実データには接続しません。最初に開発統制、仕様トレーサビリティ、個人情報の保存境界を確定します。
+会社承認前の設計・準備段階です。本番GAS、職場Google Drive、実データには接続しません。Phase 0で開発統制と保存境界を定め、現在はPhase 1として分析要件とGoogle Sheets正本データ契約を設計しています。
 
 ## 最上位の制約
 
@@ -20,6 +20,10 @@
 ## 計画文書
 
 - [Phase 0 開発統制と仕様トレーサビリティ](docs/plans/phase-0-governance-and-traceability.md)
+- [Phase 1 分析要件と正本データ契約](docs/plans/phase-1-analysis-and-data-contract.md)
+- [河合塾帳票と既存試作のギャップ分析](docs/reviews/kawai-sample-and-prototype-gap-analysis.md)
+- [分析要件カタログ](docs/design/analysis-catalog.md)
+- [Google Sheets正本データモデル案](docs/design/canonical-data-model.md)
 - [個人情報の保存境界](docs/security/privacy-boundary.md)
 - [仕様トレーサビリティ](docs/requirements/spec-traceability.md)
 - [仕様変更提案](docs/changes/spec-change-proposals.md)
