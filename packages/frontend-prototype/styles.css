@@ -69,6 +69,7 @@ select, input { width: 100%; border: 1px solid var(--line); border-radius: 9px; 
 .stack .wrong { background: #d18b31; }
 .stack .partial { background: #8a75aa; }
 .stack .blank { background: #b6c2c8; }
+.stack .extra { background: #5f6b73; }
 .heatmap { width: 100%; border-collapse: separate; border-spacing: 5px; font-size: 0.74rem; }
 .heatmap th { color: var(--muted); font-weight: 700; text-align: center; }
 .heatmap td { min-width: 70px; padding: 11px 7px; border-radius: 7px; text-align: center; font-weight: 800; background: #edf3f5; }

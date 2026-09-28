@@ -73,6 +73,9 @@ export const ANALYTICS_METRIC_IDS = [
   "change_from_previous_event",
   "change_distribution",
   "change_by_baseline_band",
+  "national_gap_rate_change_mean",
+  "deviation_change_mean",
+  "deviation_change_distribution",
   "subject_balance_range",
 ] as const;
 

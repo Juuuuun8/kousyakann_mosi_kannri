@@ -37,6 +37,15 @@ const isInteger = (value: unknown): value is number => typeof value === "number"
 const isOneOf = (values: readonly string[], value: unknown): boolean =>
   typeof value === "string" && values.includes(value);
 
+function rejectUnknownKeys(value: Record<string, unknown>, allowed: readonly string[], path: string, issues: AnalyticsValidationIssue[]): void {
+  const allowedSet = new Set(allowed);
+  Object.keys(value).filter((key) => !allowedSet.has(key)).forEach((key) => issues.push(issue(`${path}.${key}`, "UNKNOWN_KEY", "field is not part of this contract")));
+}
+
+function rejectDuplicates(value: unknown, path: string, issues: AnalyticsValidationIssue[]): void {
+  if (Array.isArray(value) && new Set(value.map(String)).size !== value.length) issues.push(issue(path, "DUPLICATE", "must not contain duplicate values"));
+}
+
 function issue(path: string, code: string, message: string): AnalyticsValidationIssue {
   return { path, code, message };
 }
@@ -64,6 +73,10 @@ function validateFilter(value: unknown, path: string, issues: AnalyticsValidatio
     issues.push(issue(path, "OBJECT", "filter must be an object"));
     return;
   }
+  rejectUnknownKeys(value, [
+    "examEventIds", "locationIds", "schoolCodes", "gradeRaws", "subjectDefinitionIds", "metricDefinitionIds",
+    "targetUniversityIds", "targetPreferenceOrders", "schemaVersionIds", "missingReasons", "importedAtFrom", "importedAtTo",
+  ], path, issues);
   for (const key of [
     "examEventIds",
     "locationIds",
@@ -73,6 +86,7 @@ function validateFilter(value: unknown, path: string, issues: AnalyticsValidatio
     "targetUniversityIds",
   ]) arrayOfIds(value[key], `${path}.${key}`, issues);
   for (const key of ["schoolCodes", "gradeRaws"]) arrayOfStrings(value[key], `${path}.${key}`, issues);
+  for (const key of ["examEventIds", "locationIds", "schoolCodes", "gradeRaws", "subjectDefinitionIds", "metricDefinitionIds", "targetUniversityIds", "targetPreferenceOrders", "schemaVersionIds", "missingReasons"]) rejectDuplicates(value[key], `${path}.${key}`, issues);
   if (value.targetPreferenceOrders !== undefined &&
       (!Array.isArray(value.targetPreferenceOrders) ||
        value.targetPreferenceOrders.some((item) => !isInteger(item) || item < 1))) {
@@ -97,6 +111,7 @@ function validateQuantiles(value: unknown, path: string, issues: AnalyticsValida
     issues.push(issue(path, "QUANTILES", "quantiles must be an object or null"));
     return;
   }
+  rejectUnknownKeys(value, ["minimum", "p25", "median", "p75", "maximum"], path, issues);
   const values = [value.minimum, value.p25, value.median, value.p75, value.maximum];
   if (values.some((item) => typeof item !== "number" || !Number.isFinite(item))) {
     issues.push(issue(path, "QUANTILES", "all quantiles must be finite numbers"));
@@ -121,6 +136,7 @@ function validatePoints(value: unknown, path: string, issues: AnalyticsValidatio
       issues.push(issue(pointPath, "OBJECT", "point must be an object"));
       return;
     }
+    rejectUnknownKeys(point, ["key", "seriesKey", "value", "denominator", "sampleCount", "missingCount"], pointPath, issues);
     if (!isString(point.key) || point.key.length === 0) issues.push(issue(`${pointPath}.key`, "KEY", "point key is required"));
     if (point.seriesKey !== null && (!isString(point.seriesKey) || point.seriesKey.length === 0)) issues.push(issue(`${pointPath}.seriesKey`, "STRING_OR_NULL", "seriesKey must be non-empty or null"));
     if (point.value !== null && (typeof point.value !== "number" || !Number.isFinite(point.value))) issues.push(issue(`${pointPath}.value`, "NUMBER_OR_NULL", "point value must be finite or null"));
@@ -134,6 +150,7 @@ function validatePoints(value: unknown, path: string, issues: AnalyticsValidatio
 export function validateAnalyticsQuery(value: unknown): AnalyticsValidationResult {
   const issues: AnalyticsValidationIssue[] = [];
   if (!isRecord(value)) return result([issue("$", "OBJECT", "query must be an object")]);
+  rejectUnknownKeys(value, ["resultVersion", "actorRole", "filter", "groupBy", "metricIds", "comparison", "suppressionThreshold"], "$", issues);
   if (value.resultVersion !== ANALYTICS_RESULT_VERSION) {
     issues.push(issue("$.resultVersion", "VERSION", `must be ${ANALYTICS_RESULT_VERSION}`));
   }
@@ -142,16 +159,18 @@ export function validateAnalyticsQuery(value: unknown): AnalyticsValidationResul
   if (!Array.isArray(value.groupBy) || value.groupBy.length === 0 || value.groupBy.some((item) => !isOneOf(ANALYTICS_GROUPINGS, item))) {
     issues.push(issue("$.groupBy", "GROUPING", "must contain one or more supported groupings"));
   }
+  rejectDuplicates(value.groupBy, "$.groupBy", issues);
   if (!Array.isArray(value.metricIds) || value.metricIds.length === 0 || value.metricIds.some((item) => !isOneOf(ANALYTICS_METRIC_IDS, item))) {
     issues.push(issue("$.metricIds", "METRIC", "must contain one or more supported metrics"));
   }
-  if (value.suppressionThreshold !== undefined &&
-      (!isInteger(value.suppressionThreshold) || value.suppressionThreshold < 1)) {
+  rejectDuplicates(value.metricIds, "$.metricIds", issues);
+  if (!isInteger(value.suppressionThreshold) || value.suppressionThreshold < 1) {
     issues.push(issue("$.suppressionThreshold", "THRESHOLD", "must be a positive integer"));
   }
   if (value.comparison !== undefined) {
     if (!isRecord(value.comparison)) issues.push(issue("$.comparison", "OBJECT", "comparison must be an object"));
     else {
+      rejectUnknownKeys(value.comparison, ["baseline", "comparison", "label"], "$.comparison", issues);
       validateFilter(value.comparison.baseline, "$.comparison.baseline", issues);
       validateFilter(value.comparison.comparison, "$.comparison.comparison", issues);
       if (value.comparison.label !== undefined && (!isString(value.comparison.label) || value.comparison.label.length === 0)) {
@@ -165,6 +184,7 @@ export function validateAnalyticsQuery(value: unknown): AnalyticsValidationResul
 export function validateAnalyticsResult(value: unknown): AnalyticsValidationResult {
   const issues: AnalyticsValidationIssue[] = [];
   if (!isRecord(value)) return result([issue("$", "OBJECT", "result must be an object")]);
+  rejectUnknownKeys(value, ["resultVersion", "generatedAt", "query", "groups", "warnings"], "$", issues);
   if (value.resultVersion !== ANALYTICS_RESULT_VERSION) issues.push(issue("$.resultVersion", "VERSION", "unsupported result version"));
   if (!isString(value.generatedAt) || !ISO_RE.test(value.generatedAt)) issues.push(issue("$.generatedAt", "ISO_DATETIME", "must be UTC datetime"));
   const queryResult = validateAnalyticsQuery(value.query);
@@ -176,16 +196,42 @@ export function validateAnalyticsResult(value: unknown): AnalyticsValidationResu
       issues.push(issue(path, "GROUP_RESULT", "group result must contain group and metrics"));
       return;
     }
+    rejectUnknownKeys(group, ["group", "metrics"], path, issues);
+    rejectUnknownKeys(group.group, ["groupKey", "dimensions", "subjectDefinitionId", "sampleCount", "excludedCount", "missingCounts"], `${path}.group`, issues);
     if (!isString(group.group.groupKey) || group.group.groupKey.length === 0) issues.push(issue(`${path}.group.groupKey`, "GROUP_KEY", "groupKey is required"));
     if (!isInteger(group.group.sampleCount) || group.group.sampleCount < 0) issues.push(issue(`${path}.group.sampleCount`, "COUNT", "sampleCount must be non-negative"));
     if (!isInteger(group.group.excludedCount) || group.group.excludedCount < 0) issues.push(issue(`${path}.group.excludedCount`, "COUNT", "excludedCount must be non-negative"));
     if (!Array.isArray(group.group.missingCounts)) issues.push(issue(`${path}.group.missingCounts`, "ARRAY", "missingCounts must be an array"));
+    else group.group.missingCounts.forEach((missing, missingIndex) => {
+      const missingPath = `${path}.group.missingCounts[${missingIndex}]`;
+      if (!isRecord(missing)) issues.push(issue(missingPath, "OBJECT", "missing count must be an object"));
+      else {
+        rejectUnknownKeys(missing, ["reason", "count"], missingPath, issues);
+        if (!MISSING_REASONS.has(String(missing.reason))) issues.push(issue(`${missingPath}.reason`, "MISSING_REASON", "unknown missing reason"));
+        if (!isInteger(missing.count) || missing.count < 0) issues.push(issue(`${missingPath}.count`, "COUNT", "count must be non-negative"));
+      }
+    });
+    if (!isRecord(group.group.dimensions)) issues.push(issue(`${path}.group.dimensions`, "OBJECT", "dimensions must be an object"));
+    else {
+      const dimensionKeys = Object.keys(group.group.dimensions);
+      dimensionKeys.filter((key) => !isOneOf(ANALYTICS_DIMENSIONS, key)).forEach((key) => issues.push(issue(`${path}.group.dimensions.${key}`, "DIMENSION", "unknown or unsafe dimension")));
+      dimensionKeys.forEach((key) => { if (!isString(group.group.dimensions[key]) || group.group.dimensions[key].length === 0 || group.group.dimensions[key].length > 256) issues.push(issue(`${path}.group.dimensions.${key}`, "STRING", "dimension value must be 1-256 characters")); });
+      const expectedDimensions = isRecord(value.query) && Array.isArray(value.query.groupBy) ? value.query.groupBy.map(String).filter((key) => key !== "overall") : [];
+      if (dimensionKeys.length !== expectedDimensions.length || expectedDimensions.some((key) => !dimensionKeys.includes(key))) issues.push(issue(`${path}.group.dimensions`, "DIMENSION_SET", "dimensions must exactly match non-overall query groupings"));
+    }
+    if (group.group.subjectDefinitionId !== null && (!isString(group.group.subjectDefinitionId) || !ID_RE.test(group.group.subjectDefinitionId))) issues.push(issue(`${path}.group.subjectDefinitionId`, "ID_OR_NULL", "subjectDefinitionId must be a contract identifier or null"));
+    if (isRecord(value.query) && Array.isArray(value.query.groupBy)) {
+      const subjectGrouped = value.query.groupBy.includes("subject");
+      if (subjectGrouped && group.group.subjectDefinitionId !== group.group.dimensions.subject) issues.push(issue(`${path}.group.subjectDefinitionId`, "SUBJECT_DIMENSION", "must match the subject dimension"));
+      if (!subjectGrouped && group.group.subjectDefinitionId !== null) issues.push(issue(`${path}.group.subjectDefinitionId`, "SUBJECT_DIMENSION", "must be null when subject is not grouped"));
+    }
     group.metrics.forEach((metric, metricIndex) => {
       const metricPath = `${path}.metrics[${metricIndex}]`;
       if (!isRecord(metric)) {
         issues.push(issue(metricPath, "OBJECT", "metric must be an object"));
         return;
       }
+      rejectUnknownKeys(metric, ["metricId", "displayType", "value", "unit", "denominator", "quantiles", "points", "suppressed", "suppressionReason"], metricPath, issues);
       if (!isOneOf(ANALYTICS_METRIC_IDS, metric.metricId)) issues.push(issue(`${metricPath}.metricId`, "METRIC", "unknown metric"));
       if (!isOneOf(ANALYTICS_DISPLAY_TYPES, metric.displayType)) issues.push(issue(`${metricPath}.displayType`, "DISPLAY_TYPE", "unknown display type"));
       if (!isOneOf(ANALYTICS_UNITS, metric.unit)) issues.push(issue(`${metricPath}.unit`, "UNIT", "unknown unit"));
@@ -207,7 +253,12 @@ export function validateAnalyticsResult(value: unknown): AnalyticsValidationResu
         issues.push(issue(`${metricPath}.points`, "POINTS_REQUIRED", `${metric.displayType} requires points`));
       }
     });
+    const queryMetricIds = isRecord(value.query) && Array.isArray(value.query.metricIds) ? value.query.metricIds.map(String) : [];
+    const resultMetricIds = group.metrics.flatMap((metric) => isRecord(metric) && isString(metric.metricId) ? [metric.metricId] : []);
+    if (new Set(resultMetricIds).size !== resultMetricIds.length) issues.push(issue(`${path}.metrics`, "DUPLICATE_METRIC", "group must not contain duplicate metric IDs"));
+    if (queryMetricIds.length && (queryMetricIds.length !== resultMetricIds.length || queryMetricIds.some((id) => !resultMetricIds.includes(id)))) issues.push(issue(`${path}.metrics`, "METRIC_SET", "group metrics must exactly match query.metricIds"));
   });
+  if (!Array.isArray(value.warnings) || value.warnings.some((warning) => !isString(warning) || warning.length > 500)) issues.push(issue("$.warnings", "STRING_ARRAY", "warnings must be an array of strings no longer than 500 characters"));
   return result(issues);
 }
 

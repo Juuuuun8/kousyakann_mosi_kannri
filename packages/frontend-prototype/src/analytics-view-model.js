@@ -60,3 +60,62 @@ export function targetSummaryModel(result) {
     suppressed: group.metrics.some((item) => item.suppressed),
   };
 }
+
+export function comparisonSummaryModel(result) {
+  const group = result.groups[0];
+  if (!group) return { comparableCount: 0, excludedCount: 0, scoreRateChange: "—", nationalGapChange: "—", deviationChange: "—", changeQuartiles: "—", baselineBands: [], suppressed: true };
+  const comparable = metric(group, "comparable_person_count");
+  const scoreRateChange = metric(group, "change_from_previous_event");
+  const nationalGapChange = metric(group, "national_gap_rate_change_mean");
+  const deviationChange = metric(group, "deviation_change_mean");
+  const distribution = metric(group, "change_distribution");
+  const byBand = metric(group, "change_by_baseline_band");
+  return {
+    comparableCount: comparable?.suppressed ? group.group.sampleCount : comparable?.value ?? group.group.sampleCount,
+    excludedCount: group.group.excludedCount,
+    scoreRateChange: display(scoreRateChange, (value) => decimal(value, "pt")),
+    nationalGapChange: display(nationalGapChange, (value) => decimal(value, "pt")),
+    deviationChange: display(deviationChange, (value) => decimal(value)),
+    changeQuartiles: distribution?.suppressed ? "抑制" : `${decimal(distribution?.quantiles?.p25 ?? null, "pt")}〜${decimal(distribution?.quantiles?.p75 ?? null, "pt")}`,
+    baselineBands: byBand?.suppressed ? [] : byBand?.points.map((point) => ({
+      key: point.key,
+      sampleCount: point.sampleCount,
+      value: point.value === null ? "抑制" : decimal(point.value, "pt"),
+    })) ?? [],
+    suppressed: group.metrics.some((item) => item.suppressed),
+  };
+}
+
+export function domainTableModel(result, labels = {}) {
+  return result.groups.map((group) => {
+    const id = group.group.dimensions.domain ?? "domain.unknown";
+    const rate = metric(group, "domain_score_rate_mean");
+    const abilityGap = metric(group, "same_ability_gap_mean");
+    return {
+      id,
+      label: labels[id] ?? id,
+      sampleCount: group.group.sampleCount,
+      scoreRate: display(rate, (value) => percentage(value)),
+      sameAbilityGap: display(abilityGap, (value) => decimal(value, "点")),
+      missingCount: group.group.missingCounts.reduce((sum, item) => sum + item.count, 0),
+      suppressed: group.metrics.some((item) => item.suppressed),
+    };
+  });
+}
+
+export function answerCompositionModel(result) {
+  const group = result.groups[0];
+  if (!group) return { sampleCount: 0, parts: [], suppressed: true };
+  const definitions = [
+    ["item_correct_rate", "正答", "correct"],
+    ["item_wrong_rate", "誤答", "wrong"],
+    ["item_partial_rate", "部分点", "partial"],
+    ["item_no_answer_rate", "無回答", "blank"],
+    ["item_extra_mark_rate", "余分マーク", "extra"],
+  ];
+  const parts = definitions.map(([metricId, label, className]) => {
+    const value = metric(group, metricId);
+    return { label, className, rate: value?.suppressed || value?.value === null || value?.value === undefined ? null : value.value, denominator: value?.denominator ?? 0 };
+  });
+  return { sampleCount: group.group.sampleCount, parts, suppressed: group.metrics.some((item) => item.suppressed) };
+}

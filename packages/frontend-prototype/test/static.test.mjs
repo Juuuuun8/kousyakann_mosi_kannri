@@ -1,10 +1,17 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { subjectTableModel, targetSummaryModel } from "../src/analytics-view-model.js";
-import { syntheticSubjectResult, syntheticTargetResult } from "../src/synthetic-analytics-results.js";
+import { validateAnalyticsResult } from "../../analytics-contracts/src/index.ts";
+import { answerCompositionModel, comparisonSummaryModel, domainTableModel, subjectTableModel, targetSummaryModel } from "../src/analytics-view-model.js";
+import { syntheticAnswerResult, syntheticComparisonResult, syntheticDomainResult, syntheticSubjectResult, syntheticTargetResult } from "../src/synthetic-analytics-results.js";
 
 const root = new URL("../", import.meta.url);
+
+test("every synthetic screen result satisfies the runtime analytics contract", () => {
+  for (const result of [syntheticSubjectResult, syntheticTargetResult, syntheticComparisonResult, syntheticDomainResult, syntheticAnswerResult]) {
+    assert.deepEqual(validateAnalyticsResult(result), { ok: true, issues: [] });
+  }
+});
 
 async function text(file) {
   return readFile(new URL(file, root), "utf8");
@@ -47,6 +54,23 @@ test("analytics result adapters expose evidence and suppression without direct i
   suppressed.groups[0].metrics = suppressed.groups[0].metrics.map((metric) => ({ ...metric, value: null, quantiles: null, points: [], suppressed: true, suppressionReason: "SMALL_GROUP" }));
   assert.match(subjectTableModel(suppressed)[0].mean, /抑制/);
   assert.equal(subjectTableModel(suppressed)[0].median, "抑制");
+
+  const comparison = comparisonSummaryModel(syntheticComparisonResult);
+  assert.equal(comparison.comparableCount, 98);
+  assert.equal(comparison.excludedCount, 12);
+  assert.equal(comparison.scoreRateChange, "+3.1pt");
+  assert.equal(comparison.nationalGapChange, "+1.8pt");
+  assert.equal(comparison.baselineBands.length, 4);
+
+  const domains = domainTableModel(syntheticDomainResult, { "domain.synthetic.probability": "確率" });
+  assert.equal(domains[0].label, "確率");
+  assert.equal(domains[0].scoreRate, "57.0%");
+  assert.equal(domains[0].missingCount, 3);
+
+  const answers = answerCompositionModel(syntheticAnswerResult);
+  assert.equal(answers.sampleCount, 101);
+  assert.equal(answers.parts.reduce((sum, part) => sum + (part.rate ?? 0), 0), 1);
+  assert.equal(answers.parts.find((part) => part.label === "余分マーク")?.rate, .01);
 });
 
 test("login prototype does not persist or transmit credentials", async () => {

@@ -1,10 +1,14 @@
-import { subjectTableModel, targetSummaryModel } from "./analytics-view-model.js";
-import { syntheticSubjectResult, syntheticTargetResult } from "./synthetic-analytics-results.js";
+import { answerCompositionModel, comparisonSummaryModel, domainTableModel, subjectTableModel, targetSummaryModel } from "./analytics-view-model.js";
+import { syntheticAnswerResult, syntheticComparisonResult, syntheticDomainResult, syntheticSubjectResult, syntheticTargetResult } from "./synthetic-analytics-results.js";
 
 const app = document.querySelector("#app");
 const tabs = [...document.querySelectorAll("[data-tab]")];
 const stateSelect = document.querySelector("#state-select");
 let activeTab = "overview";
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+}
 
 const stateCopy = {
   loading: { className: "notice", icon: "◌", title: "読み込み中", body: "正本データと版一致した集計を読み込んでいます。長時間変わらない場合はRequestIDを管理者へ伝えてください。" },
@@ -16,7 +20,7 @@ const stateCopy = {
 };
 
 function metricCard(label, value, note) {
-  return `<article class="kpi"><p class="eyebrow">${label}</p><div class="kpi-value">${value}</div><div class="kpi-note">${note}</div></article>`;
+  return `<article class="kpi"><p class="eyebrow">${escapeHtml(label)}</p><div class="kpi-value">${escapeHtml(value)}</div><div class="kpi-note">${escapeHtml(note)}</div></article>`;
 }
 
 function notice(state) {
@@ -30,7 +34,10 @@ function histogram() {
 }
 
 function overview() {
-  return `<section class="panel"><div class="panel-heading"><div><p class="eyebrow">ACTIVE REPORTS</p><h2>全体概要</h2></div><span class="status-pill">版一致 · 更新 09:42</span></div><div class="kpis">${metricCard("登録人数", "1,248", "対象 1,302 / 除外 54")}${metricCard("平均 / 中央値", "64.2 / 66.0%", "四分位 54.0–76.0%")}${metricCard("前回比較可能", "978", "同一Person確定者のみ")}${metricCard("要確認", "18", "Schema 6 · 欠損 12")}</div>${histogram()}</section><div class="grid-2"><section class="panel"><div class="panel-heading"><div><p class="eyebrow">COMPARABLE TREND</p><h2>同一受験者の回次推移</h2></div><span class="status-pill">n = 978</span></div><div class="trend-list"><div class="trend-row"><span>第1回 → 第2回</span><div class="trend-track"><div class="trend-value" style="margin-left:50%;width:18%"></div></div><strong>+3.1pt</strong></div><div class="trend-row"><span>下位25%帯</span><div class="trend-track"><div class="trend-value" style="margin-left:50%;width:26%"></div></div><strong>+4.6pt</strong></div><div class="trend-row"><span>上位25%帯</span><div class="trend-track"><div class="trend-value" style="margin-left:44%;width:6%"></div></div><strong>-1.1pt</strong></div></div><div class="evidence-note">母集団の入れ替わりを避けるため、前後2回とも受験し本人対応が確定した人だけで比較しています。変化の原因はこの表示だけでは断定しません。</div></section><section class="panel"><p class="eyebrow">DATA QUALITY</p><h2>品質サマリ</h2><table class="data-table"><tbody><tr><td>データ完全率</td><td><span class="status-pill">98.6%</span></td></tr><tr><td>要確認</td><td><span class="status-pill warn">18</span></td></tr><tr><td>分析除外</td><td><span class="status-pill danger">7</span></td></tr><tr><td>未受験・非掲載</td><td>87 / 29</td></tr></tbody></table><div class="panel-footer">欠損は未受験・非掲載・帳票空欄・解析不能を区別します。</div></section></div>`;
+  const trend = comparisonSummaryModel(syntheticComparisonResult);
+  const bandLabels = { "baseline.lt25": "前回25%未満", "baseline.25-50": "前回25–50%", "baseline.50-75": "前回50–75%", "baseline.gte75": "前回75%以上" };
+  const bandRows = trend.baselineBands.map((band) => `<div class="trend-row"><span>${escapeHtml(bandLabels[band.key] ?? band.key)}（n=${escapeHtml(band.sampleCount)}）</span><div class="trend-track"><div class="trend-value" style="margin-left:50%;width:${Math.min(40, Math.abs(Number.parseFloat(band.value)) * 4)}%"></div></div><strong>${escapeHtml(band.value)}</strong></div>`).join("");
+  return `<section class="panel"><div class="panel-heading"><div><p class="eyebrow">ACTIVE REPORTS</p><h2>全体概要</h2></div><span class="status-pill">版条件確認済み · 更新 09:42</span></div><div class="kpis">${metricCard("登録人数", "1,248", "対象 1,302 / 除外 54")}${metricCard("平均 / 中央値", "64.2 / 66.0%", "四分位 54.0–76.0%")}${metricCard("前回比較可能", String(trend.comparableCount), `比較不能 ${trend.excludedCount}`)}${metricCard("得点率変化", trend.scoreRateChange, `四分位 ${trend.changeQuartiles}`)}</div>${histogram()}</section><div class="grid-2"><section class="panel"><div class="panel-heading"><div><p class="eyebrow">COMPARABLE TREND</p><h2>同一受験者の回次推移</h2></div><span class="status-pill">n = ${escapeHtml(trend.comparableCount)}</span></div><div class="trend-list"><div class="trend-row"><span>得点率変化</span><div class="trend-track"><div class="trend-value" style="margin-left:50%;width:18%"></div></div><strong>${escapeHtml(trend.scoreRateChange)}</strong></div><div class="trend-row"><span>全国平均との差の変化</span><div class="trend-track"><div class="trend-value" style="margin-left:50%;width:11%"></div></div><strong>${escapeHtml(trend.nationalGapChange)}</strong></div><div class="trend-row"><span>偏差値変化</span><div class="trend-track"><div class="trend-value" style="margin-left:50%;width:8%"></div></div><strong>${escapeHtml(trend.deviationChange)}</strong></div>${bandRows}</div><div class="evidence-note">前後2回とも受験し、本人・科目・指標定義が一致した人だけで比較しています。得点率、全国平均との差、偏差値を分け、変化の原因は断定しません。</div></section><section class="panel"><p class="eyebrow">DATA QUALITY</p><h2>品質サマリ</h2><table class="data-table"><tbody><tr><td>データ完全率</td><td><span class="status-pill">98.6%</span></td></tr><tr><td>比較不能</td><td><span class="status-pill warn">${escapeHtml(trend.excludedCount)}</span></td></tr><tr><td>SchemaVersion</td><td>回次ごとに記録</td></tr><tr><td>未受験・非掲載</td><td>別理由で集計</td></tr></tbody></table><div class="panel-footer">欠損は未受験・非掲載・帳票空欄・解析不能を区別します。</div></section></div>`;
 }
 
 function comparison() {
@@ -39,7 +46,10 @@ function comparison() {
 
 function subjects() {
   const rows = subjectTableModel(syntheticSubjectResult);
-  return `<section class="panel"><div class="panel-heading"><div><p class="eyebrow">SUBJECT / DOMAIN</p><h2>科目・分野の観測値</h2></div><span class="status-pill">集計結果契約 v1</span></div><table class="data-table"><thead><tr><th>科目</th><th>対象人数</th><th>平均 / 中央値</th><th>四分位範囲</th><th>全国差</th><th>標準偏差</th><th>欠損</th></tr></thead><tbody>${rows.map((row) => `<tr><td>${row.subject}</td><td>${row.sampleCount}</td><td>${row.mean} / ${row.median}</td><td>${row.interquartileRange}</td><td>${row.nationalGap}</td><td>${row.standardDeviation}</td><td>${row.missingCount}</td></tr>`).join("")}</tbody></table><div class="evidence-note">表示値はAnalyticsResultの母数・欠損・四分位から生成しています。未受験を0点へ変換せず、異なる指標定義や帳票版は混在させません。</div></section>`;
+  const domains = domainTableModel(syntheticDomainResult, { "domain.synthetic.probability": "確率", "domain.synthetic.vectors": "ベクトル", "domain.synthetic.calculus": "微積分" });
+  const answers = answerCompositionModel(syntheticAnswerResult);
+  const answerParts = answers.parts.filter((part) => part.rate !== null);
+  return `<section class="panel"><div class="panel-heading"><div><p class="eyebrow">SUBJECT / DOMAIN</p><h2>科目・分野の観測値</h2></div><span class="status-pill">集計結果契約 v1</span></div><table class="data-table"><thead><tr><th>科目</th><th>対象人数</th><th>平均 / 中央値</th><th>四分位範囲</th><th>全国差</th><th>標準偏差</th><th>欠損</th></tr></thead><tbody>${rows.map((row) => `<tr><td>${escapeHtml(row.subject)}</td><td>${escapeHtml(row.sampleCount)}</td><td>${escapeHtml(row.mean)} / ${escapeHtml(row.median)}</td><td>${escapeHtml(row.interquartileRange)}</td><td>${escapeHtml(row.nationalGap)}</td><td>${escapeHtml(row.standardDeviation)}</td><td>${escapeHtml(row.missingCount)}</td></tr>`).join("")}</tbody></table><div class="grid-2"><div class="chart"><div class="chart-title"><strong>数学 分野別</strong><span>同学力帯差を併記</span></div><table class="data-table"><thead><tr><th>分野</th><th>対象</th><th>得点率</th><th>同学力帯差</th><th>欠損</th></tr></thead><tbody>${domains.map((row) => `<tr><td>${escapeHtml(row.label)}</td><td>${escapeHtml(row.sampleCount)}</td><td>${escapeHtml(row.scoreRate)}</td><td>${escapeHtml(row.sameAbilityGap)}</td><td>${escapeHtml(row.missingCount)}</td></tr>`).join("")}</tbody></table></div><div class="chart"><div class="chart-title"><strong>数学 設問結果構成</strong><span>対象者 ${escapeHtml(answers.sampleCount)}</span></div><div class="stack" aria-label="${escapeHtml(answerParts.map((part) => `${part.label}${(part.rate * 100).toFixed(1)}%`).join("、"))}">${answerParts.map((part) => `<span class="${escapeHtml(part.className)}" style="width:${(part.rate * 100).toFixed(1)}%"></span>`).join("")}</div><div class="legend">${answerParts.map((part) => `<span>${escapeHtml(part.label)} ${(part.rate * 100).toFixed(1)}%</span>`).join("")}</div><p class="chart-note">掲載設問の正誤・部分点・無回答・余分マークを区別します。解答位置から原因を自動断定しません。</p></div></div><div class="evidence-note">表示値はAnalyticsResultの母数・欠損・四分位から生成しています。未受験を0点へ変換せず、異なる指標定義や帳票版は混在させません。</div></section>`;
 }
 
 function targets() {

@@ -14,7 +14,7 @@
 
 正本の`ReportRecord`と版管理されたPayloadから、分野、設問、志望校の判断材料をADMIN向け集計結果へ変換する。PDF原文、氏名、大学名の原表記等を集団分析結果へ返さず、ブラウザは`AnalyticsResult`だけを描画する。
 
-INPUT向け分析、比較クエリ、個人ドリルダウン、GAS/Sheets接続、本番キャッシュは対象外とする。会社承認前なので、実データと職場Google Driveには接続しない。
+INPUT向け分析、Payloadの回次比較、個人ドリルダウン、GAS/Sheets接続、本番キャッシュは対象外とする。SubjectScoreの回次比較はP2-T08で実装した。会社承認前なので、実データと職場Google Driveには接続しない。
 
 ## 3 実装した集計
 

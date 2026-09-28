@@ -22,6 +22,9 @@ test("analytics query contract fixes admin, filters, metrics, and suppression", 
   assert.equal(defaultSuppressionThreshold(), 5);
   assert.equal(validateAnalyticsQuery({ ...validQuery, actorRole: "INPUT" }).ok, false);
   assert.equal(validateAnalyticsQuery({ ...validQuery, metricIds: ["not-a-metric"] }).ok, false);
+  assert.equal(validateAnalyticsQuery({ ...validQuery, suppressionThreshold: undefined }).ok, false);
+  assert.equal(validateAnalyticsQuery({ ...validQuery, studentName: "must-not-pass" }).ok, false);
+  assert.equal(validateAnalyticsQuery({ ...validQuery, groupBy: ["location", "location"] }).ok, false);
   assert.equal(validateAnalyticsQuery({ ...validQuery, filter: { importedAtFrom: "2026-10-01T00:00:00Z", importedAtTo: "2026-09-01T00:00:00Z" } }).ok, false);
   assert.equal(validateAnalyticsQuery({ ...validQuery, filter: { metricDefinitionIds: ["metric.subject.summary"] }, groupBy: ["metric_definition"] }).ok, true);
 });
@@ -34,15 +37,15 @@ test("analytics result contract requires suppression metadata", () => {
     groups: [{
       group: {
         groupKey: "loc.synthetic.1",
-        dimensions: { location: "loc.synthetic.1" },
-        subjectDefinitionId: null,
+        dimensions: { location: "loc.synthetic.1", subject: "subject.synthetic.01" },
+        subjectDefinitionId: "subject.synthetic.01",
         sampleCount: 12,
         excludedCount: 1,
         missingCounts: [],
       },
       metrics: [
         { metricId: "score_mean", displayType: "scalar", value: 61.5, unit: "score", denominator: 12, quantiles: null, points: [], suppressed: false, suppressionReason: null },
-        { metricId: "deviation_mean", displayType: "scalar", value: null, unit: "deviation", denominator: 3, quantiles: null, points: [], suppressed: true, suppressionReason: "SMALL_GROUP" },
+        { metricId: "missing_rate", displayType: "scalar", value: null, unit: "rate", denominator: 3, quantiles: null, points: [], suppressed: true, suppressionReason: "SMALL_GROUP" },
       ],
     }],
     warnings: [],
@@ -51,13 +54,19 @@ test("analytics result contract requires suppression metadata", () => {
   const invalid = structuredClone(result);
   invalid.groups[0].metrics[1].suppressionReason = null;
   assert.equal(validateAnalyticsResult(invalid).ok, false);
+  const leakedIdentifier = structuredClone(result);
+  leakedIdentifier.groups[0].group.dimensions.studentName = "must-not-pass";
+  assert.equal(validateAnalyticsResult(leakedIdentifier).ok, false);
+  const extraMetric = structuredClone(result);
+  extraMetric.groups[0].metrics.push({ ...extraMetric.groups[0].metrics[0], metricId: "deviation_mean" });
+  assert.equal(validateAnalyticsResult(extraMetric).ok, false);
 });
 
 test("analytics result supports evidence-rich distributions and blocks suppressed leakage", () => {
   const result = {
     resultVersion: ANALYTICS_RESULT_VERSION,
     generatedAt: "2026-09-28T00:00:00Z",
-    query: { ...validQuery, metricIds: ["score_rate_distribution"] },
+    query: { ...validQuery, groupBy: ["overall"], metricIds: ["score_rate_distribution"] },
     groups: [{
       group: { groupKey: "overall", dimensions: {}, subjectDefinitionId: null, sampleCount: 120, excludedCount: 8, missingCounts: [] },
       metrics: [{
