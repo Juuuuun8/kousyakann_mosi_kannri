@@ -26,6 +26,8 @@ const ROW_KEYS = [
   "deviation", "abilityLevel", "missingReason", "parserVersion", "payloadFormatVersion",
   "featureAsOf",
 ] as const;
+const REQUEST_KEYS = ["actorRole", "exportSchemaVersion", "purpose", "requestedAt", "filter", "rows"] as const;
+const FILTER_KEYS = ["examEventIds", "locationIds", "subjectDefinitionIds", "importedAtFrom", "importedAtTo"] as const;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -38,6 +40,36 @@ function result(issues: ExportValidationIssue[]): ExportValidationResult { retur
 
 function requiredId(row: Record<string, unknown>, key: string, issues: ExportValidationIssue[]): void {
   if (!isString(row[key]) || !ID_RE.test(row[key])) issues.push(issue(`$.${key}`, "ID", "must be a contract identifier"));
+}
+
+function sameKeys(value: Record<string, unknown>, allowed: readonly string[]): boolean {
+  return Object.keys(value).every((key) => allowed.includes(key));
+}
+
+function validateIdList(filter: Record<string, unknown>, key: string, issues: ExportValidationIssue[]): void {
+  const value = filter[key];
+  if (value === undefined) return;
+  if (!Array.isArray(value) || value.length === 0 || value.some((item) => !isString(item) || !ID_RE.test(item))) {
+    issues.push(issue(`$.filter.${key}`, "ID_LIST", "must be a non-empty list of contract identifiers"));
+    return;
+  }
+  if (new Set(value).size !== value.length) issues.push(issue(`$.filter.${key}`, "DUPLICATE", "filter identifiers must be unique"));
+}
+
+function validateFilter(value: unknown, issues: ExportValidationIssue[]): void {
+  if (!isRecord(value)) {
+    issues.push(issue("$.filter", "OBJECT", "filter is required"));
+    return;
+  }
+  if (!sameKeys(value, FILTER_KEYS)) issues.push(issue("$.filter", "FILTER_KEYS", "filter contains forbidden keys"));
+  for (const key of ["examEventIds", "locationIds", "subjectDefinitionIds"]) validateIdList(value, key, issues);
+  for (const key of ["importedAtFrom", "importedAtTo"]) {
+    const item = value[key];
+    if (item !== undefined && (!isString(item) || !ISO_RE.test(item))) issues.push(issue(`$.filter.${key}`, "ISO_DATETIME", "must be UTC datetime"));
+  }
+  if (isString(value.importedAtFrom) && isString(value.importedAtTo) && value.importedAtFrom > value.importedAtTo) {
+    issues.push(issue("$.filter", "DATE_ORDER", "importedAtFrom must not be after importedAtTo"));
+  }
 }
 
 export function validateMlExportRow(value: unknown): ExportValidationResult {
@@ -80,11 +112,12 @@ export function validateMlExportRows(rows: unknown): ExportValidationResult {
 export function validateMlExportRequest(value: unknown): ExportValidationResult {
   const issues: ExportValidationIssue[] = [];
   if (!isRecord(value)) return result([issue("$", "OBJECT", "export request must be an object")]);
+  if (JSON.stringify(Object.keys(value).sort()) !== JSON.stringify([...REQUEST_KEYS].sort())) issues.push(issue("$", "REQUEST_KEYS", "request contains missing or forbidden keys"));
   if (!isOneOf(ML_EXPORT_ROLES, value.actorRole)) issues.push(issue("$.actorRole", "ROLE", "only ADMIN may export"));
   if (value.exportSchemaVersion !== ML_EXPORT_SCHEMA_VERSION) issues.push(issue("$.exportSchemaVersion", "VERSION", "unsupported export schema version"));
   if (!isString(value.purpose) || value.purpose.trim().length === 0) issues.push(issue("$.purpose", "PURPOSE", "purpose is required"));
   if (!isString(value.requestedAt) || !ISO_RE.test(value.requestedAt)) issues.push(issue("$.requestedAt", "ISO_DATETIME", "must be UTC datetime"));
-  if (!isRecord(value.filter)) issues.push(issue("$.filter", "OBJECT", "filter is required"));
+  validateFilter(value.filter, issues);
   const rowsResult = validateMlExportRows(value.rows);
   issues.push(...rowsResult.issues.map((item) => ({ ...item, path: `$.rows${item.path.slice(1)}` })));
   return result(issues);

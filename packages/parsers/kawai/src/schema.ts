@@ -10,6 +10,7 @@ import {
   type ExtractResult,
   type ExtractedField,
   type NormalizeResult,
+  type ParserEvidence,
   type ParserIssue,
   type ParserSchema,
   type PdfPageText,
@@ -30,7 +31,7 @@ export const KAWAI_PROVIDER_LABEL = "河合塾";
 export const KAWAI_EXAM_FAMILY_LABEL = "全統共通テスト模試";
 export const KAWAI_REPORT_LABEL = "個人成績表";
 
-const PAGE_ANCHORS = new Map([
+const PAGE_ANCHORS: ReadonlyMap<number, readonly string[]> = new Map([
   [1, ["1-(1)成績概況", "2.成績推移"]],
   [2, ["3.設問別成績"]],
   [3, ["4.志望校別成績・評価"]],
@@ -88,7 +89,7 @@ function identityIssues(input: PdfTextDocument): ParserIssue[] {
 
 export function detectKawai(input: PdfTextDocument): DetectResult {
   const issues = [...validatePageSet(input, { expectedPageCount: 4 }), ...pageRoleIssues(input)];
-  const evidence = REQUIRED_MARKERS.flatMap((required) => {
+  const evidence: ParserEvidence[] = REQUIRED_MARKERS.flatMap((required) => {
     const pageNumber = markerPage(input, required.marker);
     return pageNumber === null ? [] : [{ code: "KAWAI_MARKER", pageNumber, label: required.label, value: required.marker }];
   });

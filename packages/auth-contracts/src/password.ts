@@ -7,10 +7,12 @@ function toBase64Url(bytes: Uint8Array): string {
   return btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/u, "");
 }
 
-function fromBase64Url(value: string): Uint8Array {
+function fromBase64Url(value: string): Uint8Array<ArrayBuffer> {
   const base64 = value.replaceAll("-", "+").replaceAll("_", "/").padEnd(Math.ceil(value.length / 4) * 4, "=");
   const binary = atob(base64);
-  return Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  return bytes;
 }
 
 export function generatePasswordSalt(): string {
@@ -21,7 +23,7 @@ export function generatePasswordSalt(): string {
 
 export async function derivePasswordVerifier(password: string, saltBase64Url: string): Promise<string> {
   const validation = validatePasswordValue(password);
-  if (!validation.ok) throw new Error(validation.issues[0].message);
+  if (!validation.ok) throw new Error(validation.issues[0]?.message ?? "password is invalid");
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(password),

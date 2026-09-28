@@ -1,4 +1,4 @@
-import type { IsoDateTime, LocationId } from "../../contracts/src/types.ts";
+import type { IsoDateTime, LocationId, Sha256Hex } from "../../contracts/src/types.ts";
 import type { CREDENTIAL_MODES, PASSWORD_ALGORITHMS, USER_ROLES, USER_STATUSES } from "./constants.ts";
 
 export type UserRole = (typeof USER_ROLES)[number];
@@ -35,6 +35,22 @@ export interface PasswordLoginRequest {
 export interface PasswordLoginPublicResult {
   readonly ok: boolean;
   readonly code: "AUTHENTICATED" | "AUTHENTICATION_FAILED" | "PASSWORD_CHANGE_REQUIRED";
+}
+
+export type AuthorizedAction = "CREATE_REPORT" | "READ_REPORTS" | "ANALYZE" | "EXPORT_ML" | "RESET_CREDENTIAL" | "CHANGE_PASSWORD" | "LOGOUT";
+
+export interface SessionRecord {
+  readonly sessionHash: Sha256Hex;
+  readonly email: string;
+  readonly issuedAt: IsoDateTime;
+  readonly expiresAt: IsoDateTime;
+  readonly revokedAt: IsoDateTime | null;
+}
+
+export interface PasswordEvaluation {
+  readonly publicResult: PasswordLoginPublicResult;
+  readonly updatedUser: UserAccessRecord | null;
+  readonly authenticatedUser: UserAccessRecord | null;
 }
 
 export interface AuthValidationIssue {

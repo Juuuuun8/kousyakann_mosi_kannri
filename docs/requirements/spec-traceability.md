@@ -15,12 +15,12 @@
 | REQ-PRIV-003 | 6.3, 10.2 | PDF・抽出全文をWeb Storageへ保存しない | privacy-boundary.md | 静的検査・ブラウザ試験 |
 | REQ-PRIV-004 | 10.3 | API応答をno-storeとする | privacy-boundary.md | ヘッダー試験 |
 | REQ-PRIV-005 | 10.3 | pdf.jsを固定版で自前配信する | phase-plan | ビルド成果物監査 |
-| REQ-AUTH-001 | 5 | INPUT、ADMIN、AUTH_MANAGERの権限継承を実装する | traceability.md | 権限マトリクス試験 |
-| REQ-AUTH-002 | 5.2, 6.4 | INPUTは登録のみで閲覧不可とする | traceability.md | API拒否試験 |
+| REQ-AUTH-001 | 5 | INPUT、ADMIN、AUTH_MANAGERの権限継承を実装する | packages/auth-contracts | 権限マトリクス試験 |
+| REQ-AUTH-002 | 5.2, 6.4 | INPUTは登録のみで閲覧不可とする | packages/auth-contracts, packages/frontend-prototype | API拒否試験・画面試験 |
 | REQ-AUTH-003 | 5.2 | 全APIでGASがUsersのRoleとStatusを確認する | traceability.md | API認可試験 |
 | REQ-AUTH-004 | 6.8 | 権限変更APIをWebアプリへ実装しない | traceability.md | API一覧監査 |
 | REQ-OTP-001 | 6.1, 9.1 | ACTIVE利用者だけへOTPを送る | traceability.md | 認証試験 |
-| REQ-SESSION-001 | 6.2, 9.2 | セッションIDをHttpOnly Secure SameSite Strict Cookieに置く | privacy-boundary.md | Cookie試験 |
+| REQ-SESSION-001 | 6.2, 9.2 | セッションIDをHttpOnly Secure SameSite Strict Cookieに置く | privacy-boundary.md, packages/auth-contracts | Cookie契約試験 |
 | REQ-SESSION-002 | 新規制約 | 利用者と結び付くOTP・セッション状態を所定のGoogle Sheets以外へ保存しない | privacy-boundary.md, SPEC-CHANGE-002 | 保存先監査 |
 | REQ-PASSWORD-001 | SPEC-CHANGE-005（承認待ち） | パスワード平文・可逆値を永続保存せず、Salt付き適応的検証値だけを所定Usersシートへ保存する | packages/auth-contracts, privacy-boundary.md | 列契約・導出試験 |
 | REQ-PASSWORD-002 | SPEC-CHANGE-005（承認待ち） | 認証失敗を共通化し、回数制限・ロック・競合制御を行う | packages/auth-contracts | 認証・同時実行試験 |
@@ -30,10 +30,10 @@
 | REQ-PARSER-003 | 6.3, 7.1 | 未知スキームをfail-closedで拒否する | packages/parsers/core, packages/parsers/kawai | 未知PDF試験 |
 | REQ-PARSER-004 | 6.12 | 新旧スキームの回帰試験を行う | phase-plan, packages/parsers/kawai | ゴールデンテスト |
 | REQ-DATA-001 | 6.4, 8.3 | RecordID、ImportedBy、ImportedAt、ParserVersion、PdfHash等を保存する | packages/contracts | 列・保存試験 |
-| REQ-DATA-002 | 6.4 | 保存先Spreadsheet IDをクライアントから受け取らない | privacy-boundary.md | 改ざん試験 |
-| REQ-DATA-003 | 6.9 | 訂正は履歴を保持し元レコードを通常削除しない | traceability.md | 訂正試験 |
-| REQ-DATA-004 | 6.10, 8.2 | 年度と容量に応じてGASが保存先を自動作成・分割する | traceability.md | 分割試験 |
-| REQ-DATA-005 | 6.4 | 重複Fingerprintを検知する | traceability.md | 二重登録試験 |
+| REQ-DATA-002 | 6.4 | 保存先Spreadsheet IDをクライアントから受け取らない | privacy-boundary.md, packages/storage-contracts | 改ざん試験 |
+| REQ-DATA-003 | 6.9 | 訂正は履歴を保持し元レコードを通常削除しない | packages/storage-contracts | 訂正試験 |
+| REQ-DATA-004 | 6.10, 8.2 | 年度と容量に応じてGASが保存先を自動作成・分割する | packages/storage-contracts | 分割試験 |
+| REQ-DATA-005 | 6.4 | 重複Fingerprintを検知する | packages/storage-contracts | 二重登録試験 |
 | REQ-DATA-006 | 6.4 | LockServiceで同時書込を制御する | traceability.md | 競合試験 |
 | REQ-ANALYSIS-001 | 6.5, 6.6 | ADMIN以上だけが閲覧・分析できる | packages/analytics-contracts, packages/frontend-prototype | 権限試験 |
 | REQ-ANALYSIS-002 | 6.6 | 分析不要な直接識別子を返さない | privacy-boundary.md, packages/analytics-contracts, packages/frontend-prototype | API項目試験 |
@@ -47,11 +47,11 @@
 | REQ-ANALYSIS-003 | ユーザー要件 | 校舎、学校、志望校、科目、個人、回次で比較・推移分析できる | analysis-catalog.md, packages/analytics-contracts | 指標・フィルタ試験 |
 | REQ-ANALYSIS-004 | 6.6、10.2 | 集計へ対象人数、除外数、欠損理由を付け、小人数群を抑制可能にする | analysis-catalog.md, packages/analytics-contracts | 母数・抑制試験 |
 | REQ-ANALYSIS-005 | ユーザー要件 | システムは指導を自動決定せず、講師が判断できる分布・比較・時系列・設問結果・品質根拠を提示する | analysis-catalog.md, packages/analytics-contracts, packages/frontend-prototype | 指標・表示文言試験 |
-| REQ-LOG-001 | 11.1 | 成功・失敗・操作種別・RequestIDを監査記録する | privacy-boundary.md | ログ試験 |
-| REQ-LOG-002 | 6.1, 11.1 | OTP、セッションID、Secret、PDF本文をログへ出さない | privacy-boundary.md | 禁止値試験 |
+| REQ-LOG-001 | 11.1 | 成功・失敗・操作種別・RequestIDを監査記録する | privacy-boundary.md, packages/audit-contracts | 閉じた列・ハッシュ鎖試験 |
+| REQ-LOG-002 | 6.1, 11.1 | OTP、セッションID、Secret、PDF本文をログへ出さない | privacy-boundary.md, packages/audit-contracts, scripts/pii-scan.mjs | 禁止列・Secret検査 |
 | REQ-BACKUP-001 | 6.11, 11.2 | Drive内で定期バックアップし世代管理する | traceability.md | バックアップ試験 |
-| REQ-SEC-001 | 9.3 | CloudflareからGASへの通信をHMAC署名する | traceability.md | 署名試験 |
-| REQ-SEC-002 | 9.3 | timestampとnonceでリプレイを防止する | traceability.md | 再送試験 |
+| REQ-SEC-001 | 9.3 | CloudflareからGASへの通信をHMAC署名する | packages/transport-contracts | 署名・改ざん試験 |
+| REQ-SEC-002 | 9.3 | timestampとnonceでリプレイを防止する | packages/transport-contracts | 期限・nonce再送試験 |
 | REQ-SEC-003 | 6.4 | 数式注入を防止する | traceability.md | 不正文字列試験 |
 | REQ-OPS-001 | 13, 14 | 開発担当変更時に所有権とSecretを移管できる | phase-plan | 引継ぎ訓練 |
 | REQ-TEST-001 | 15.1 | 機能・権限・未知PDF・重複・退職者等を受入試験する | phase-plan | テスト報告 |

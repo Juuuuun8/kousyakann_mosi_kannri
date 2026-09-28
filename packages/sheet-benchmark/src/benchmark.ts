@@ -57,12 +57,12 @@ function metricsForSheet(sheet: SheetRows): SheetMetrics {
   const rowCount = sheet.rows.length;
   const columnCount = sheet.rows.reduce((maximum, row) => Math.max(maximum, row.length), 0);
   const logicalCells = rowCount * columnCount;
-  const nonEmptyCells = sheet.rows.reduce(
-    (total, row) => total + row.reduce((rowTotal, value) => rowTotal + (isNonEmpty(value) ? 1 : 0), 0),
+  const nonEmptyCells = sheet.rows.reduce<number>(
+    (total, row) => total + row.reduce<number>((rowTotal, value) => rowTotal + (isNonEmpty(value) ? 1 : 0), 0),
     0,
   );
-  const textCharacters = sheet.rows.reduce(
-    (total, row) => total + row.reduce((rowTotal, value) => rowTotal + cellCharacterCount(value), 0),
+  const textCharacters = sheet.rows.reduce<number>(
+    (total, row) => total + row.reduce<number>((rowTotal, value) => rowTotal + cellCharacterCount(value), 0),
     0,
   );
   return { sheetName: sheet.name, rowCount, columnCount, logicalCells, nonEmptyCells, textCharacters };

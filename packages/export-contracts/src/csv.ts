@@ -21,7 +21,10 @@ export interface SerializeMlCsvOptions { readonly includeUtf8Bom?: boolean; }
 
 export function serializeMlCsv(rows: readonly MlExportRow[], options: SerializeMlCsvOptions = {}): string {
   const validation = validateMlExportRows(rows);
-  if (!validation.ok) throw new Error(`invalid ML export rows: ${validation.issues[0].path} ${validation.issues[0].message}`);
+  if (!validation.ok) {
+    const firstIssue = validation.issues[0];
+    throw new Error(firstIssue ? `invalid ML export rows: ${firstIssue.path} ${firstIssue.message}` : "invalid ML export rows");
+  }
   const lines = [ML_EXPORT_COLUMNS.map(csvCell).join(","), ...rows.map((row) => rowValues(row).map(csvCell).join(","))];
   const csv = `${lines.join("\r\n")}\r\n`;
   return options.includeUtf8Bom ? `\uFEFF${csv}` : csv;

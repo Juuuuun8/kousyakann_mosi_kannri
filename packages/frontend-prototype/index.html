@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
     <title>模試成績分析（合成プロトタイプ）</title>
     <link rel="stylesheet" href="./styles.css">
   </head>
@@ -12,18 +13,18 @@
         <p class="eyebrow">Kousyakann Mosi Kannri / prototype</p>
         <h1>模試成績分析</h1>
       </div>
-      <div class="topbar-actions"><span class="role-badge" aria-label="現在の権限">ADMIN · 全校舎閲覧</span><a class="role-badge topbar-link" href="./login.html">ログイン画面</a></div>
+      <div class="topbar-actions"><span class="role-badge" aria-label="現在の権限">ADMIN · 全校舎閲覧</span><a class="role-badge topbar-link" href="./upload.html">PDF登録</a><a class="role-badge topbar-link" href="./login.html">ログイン画面</a></div>
     </header>
 
     <main class="shell">
-      <nav class="tabs" aria-label="分析タブ">
-        <button class="tab is-active" data-tab="overview">概要</button>
-        <button class="tab" data-tab="groups">校舎・学校比較</button>
-        <button class="tab" data-tab="subjects">科目・分野</button>
-        <button class="tab" data-tab="targets">志望校</button>
-        <button class="tab" data-tab="individual">個人詳細</button>
-        <button class="tab" data-tab="quality">データ管理</button>
-        <button class="tab" data-tab="ml">ML出力</button>
+      <nav class="tabs" aria-label="分析タブ" role="tablist">
+        <button class="tab is-active" data-tab="overview" role="tab" aria-selected="true" aria-controls="app">概要</button>
+        <button class="tab" data-tab="groups" role="tab" aria-selected="false" aria-controls="app" tabindex="-1">校舎・学校比較</button>
+        <button class="tab" data-tab="subjects" role="tab" aria-selected="false" aria-controls="app" tabindex="-1">科目・分野</button>
+        <button class="tab" data-tab="targets" role="tab" aria-selected="false" aria-controls="app" tabindex="-1">志望校</button>
+        <button class="tab" data-tab="individual" role="tab" aria-selected="false" aria-controls="app" tabindex="-1">個人詳細</button>
+        <button class="tab" data-tab="quality" role="tab" aria-selected="false" aria-controls="app" tabindex="-1">データ管理</button>
+        <button class="tab" data-tab="ml" role="tab" aria-selected="false" aria-controls="app" tabindex="-1">ML出力</button>
       </nav>
 
       <section class="toolbar" aria-labelledby="filter-title">
@@ -60,7 +61,7 @@
         </select></label>
       </section>
 
-      <section id="app" aria-live="polite"></section>
+      <section id="app" role="tabpanel" aria-live="polite" tabindex="0"></section>
     </main>
 
     <script type="module" src="./src/app.js"></script>

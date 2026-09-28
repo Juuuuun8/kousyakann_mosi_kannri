@@ -47,7 +47,7 @@ function subjectId(index: number): SubjectDefinitionId {
 }
 
 function personId(index: number): PersonId {
-  return uuid(index) as PersonId;
+  return uuid(index) as unknown as PersonId;
 }
 
 export function makeSyntheticAnswerMarks(
@@ -112,7 +112,7 @@ export function makeSyntheticDataset(options: SyntheticDatasetOptions = {}): Syn
     const reportNumber = reportIndex + 1;
     const reportId = uuid(reportNumber);
     const reportPersonId = personId(1000 + reportNumber);
-    const version = "kawai.ct.2026.round-2.v1";
+    const version = "kawai.ct.2026.round-2.v1" as SchemaVersionId;
     reports.push({
       reportId,
       status: "ACTIVE",

@@ -102,9 +102,22 @@ select, input { width: 100%; border: 1px solid var(--line); border-radius: 9px; 
 .auth-help { margin: 18px 0 0; color: var(--muted); font-size: 0.73rem; line-height: 1.65; }
 .auth-error { margin-top: 14px; color: var(--danger); font-size: 0.8rem; }
 .auth-error[hidden] { display: none; }
+.upload-shell { width: min(920px, calc(100% - 32px)); margin: 28px auto 56px; display: grid; gap: 18px; }
+.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.file-picker input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.file-picker span { display: grid; place-items: center; min-height: 43px; border: 1px dashed #8ba5ae; border-radius: 9px; background: var(--soft); color: var(--accent); font-weight: 800; cursor: pointer; }
+.privacy-line { color: var(--muted); font-size: 0.76rem; line-height: 1.6; }
+.verification-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; margin: 18px 0 0; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.verification-list div { display: grid; grid-template-columns: 110px 1fr; gap: 12px; padding: 12px; background: var(--paper); }
+.verification-list dt { color: var(--muted); font-size: 0.75rem; font-weight: 800; }
+.verification-list dd { margin: 0; overflow-wrap: anywhere; font-size: 0.78rem; }
+.export-confirm { display: grid; gap: 14px; margin-top: 18px; }
+.check-row { display: flex; flex-direction: row; align-items: flex-start; gap: 9px; font-weight: 600; }
+.check-row input { width: auto; margin-top: 3px; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #e0a23a; outline-offset: 2px; }
 @media (max-width: 800px) {
   .topbar, .toolbar-heading, .state-preview, .panel-heading, .panel-footer { align-items: stretch; flex-direction: column; }
   .filter-grid, .kpis, .grid-2 { grid-template-columns: 1fr 1fr; }
   .version-chip, .role-badge { align-self: flex-start; }
 }
-@media (max-width: 520px) { .filter-grid, .kpis, .grid-2 { grid-template-columns: 1fr; } .shell { width: min(100% - 20px, 1380px); } .toolbar, .state-preview, .panel { padding: 17px; } }
+@media (max-width: 520px) { .filter-grid, .kpis, .grid-2, .upload-grid, .verification-list { grid-template-columns: 1fr; } .shell { width: min(100% - 20px, 1380px); } .toolbar, .state-preview, .panel { padding: 17px; } }

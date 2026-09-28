@@ -115,13 +115,13 @@ export function parseDomainPayloads(page: PdfPageText): readonly DomainPayload[]
         subject = heading.subject;
         continue;
       }
-      if (subject === null || words.length < 4 || !/^\d{1,2}$/u.test(normalizeWidth(words[0].text)) || !/^\d+\/\d+$/u.test(normalizeWidth(words[2].text))) continue;
+      if (subject === null || words.length < 4 || !/^\d{1,2}$/u.test(normalizeWidth(words[0]!.text)) || !/^\d+\/\d+$/u.test(normalizeWidth(words[2]!.text))) continue;
       const remainder = words.slice(2)
         .filter((word) => !(JAPANESE.test(word.text) && !word.text.includes("%")))
         .map((word) => normalizeWidth(word.text)).join(" ").replace(/-\s+(\d)/gu, "-$1");
       const match = remainder.match(ROW_PATTERN);
       if (!match) continue;
-      const item = domainItem(words[0].text, words[1].text, match);
+      const item = domainItem(words[0]!.text, words[1]!.text, match);
       const items = bySubject.get(subject) ?? [];
       items.push(item);
       bySubject.set(subject, items);

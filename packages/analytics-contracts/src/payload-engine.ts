@@ -141,13 +141,13 @@ function quantile(sorted: readonly number[], position: number): number {
   const index = (sorted.length - 1) * position;
   const lower = Math.floor(index);
   const upper = Math.ceil(index);
-  return lower === upper ? sorted[lower] : sorted[lower] + (sorted[upper] - sorted[lower]) * (index - lower);
+  return lower === upper ? sorted[lower]! : sorted[lower]! + (sorted[upper]! - sorted[lower]!) * (index - lower);
 }
 
 function summary(values: readonly number[]): AnalyticsQuantiles | null {
   if (!values.length) return null;
   const sorted = [...values].sort((a, b) => a - b);
-  return { minimum: sorted[0], p25: quantile(sorted, .25), median: quantile(sorted, .5), p75: quantile(sorted, .75), maximum: sorted.at(-1) as number };
+  return { minimum: sorted[0]!, p25: quantile(sorted, .25), median: quantile(sorted, .5), p75: quantile(sorted, .75), maximum: sorted.at(-1)! };
 }
 
 function average(values: readonly number[]): number | null {
@@ -210,7 +210,7 @@ function metric(metricId: AnalyticsMetricId, items: readonly Observation[], samp
     });
     const points = [...counts].sort(([a], [b]) => a.localeCompare(b, "ja", { numeric: true })).map(([key, count]) => {
       const [question, code] = key.split("|");
-      return { key: `question.${question}`, seriesKey: code, value: count, denominator: sampleCount, sampleCount: count, missingCount: 0 };
+      return { key: `question.${question}`, seriesKey: code ?? null, value: count, denominator: sampleCount, sampleCount: count, missingCount: 0 };
     });
     return points.length ? { metricId, displayType: "breakdown", value: null, unit: "count", denominator: items.length, quantiles: null, points, suppressed: false, suppressionReason: null } : suppressed(metricId, "breakdown", "count", 0, "INSUFFICIENT_DATA");
   }
@@ -239,9 +239,9 @@ export function executePayloadAnalytics(query: AnalyticsQuery, dataset: PayloadA
   const issues: AnalyticsExecutionIssue[] = [];
   if (unknown.length || families.size !== 1) issues.push({ code: "UNSUPPORTED_METRIC", message: "one payload family must be requested per query" });
   const family = [...families][0];
-  const unsupportedGroups = query.groupBy.filter((grouping) => !COMMON_GROUPINGS.has(grouping) && !FAMILY_GROUPINGS[family]?.has(grouping));
+  const unsupportedGroups = family === undefined ? [] : query.groupBy.filter((grouping) => !COMMON_GROUPINGS.has(grouping) && !FAMILY_GROUPINGS[family].has(grouping));
   if (unsupportedGroups.length) issues.push({ code: "UNSUPPORTED_GROUPING", message: unsupportedGroups.join(", ") });
-  if (issues.length) throw new AnalyticsExecutionError(issues);
+  if (issues.length || family === undefined) throw new AnalyticsExecutionError(issues.length ? issues : [{ code: "UNSUPPORTED_METRIC", message: "one payload family must be requested per query" }]);
 
   const reports = new Map(dataset.reports.filter((report) => report.status === "ACTIVE").map((report) => [report.reportId, report]));
   const items = dataset.payloadBindings.flatMap((binding) => {
@@ -263,6 +263,7 @@ export function executePayloadAnalytics(query: AnalyticsQuery, dataset: PayloadA
   });
   const groups = [...grouped].sort(([a], [b]) => a.localeCompare(b)).map(([key, groupItems]) => {
     const first = groupItems[0];
+    if (!first) throw new AnalyticsExecutionError([{ code: "INVALID_RESULT", message: "payload analytics group cannot be empty" }]);
     const dimensions: Partial<Record<AnalyticsDimension, string>> = {};
     query.groupBy.forEach((grouping) => { if (grouping !== "overall") dimensions[grouping as AnalyticsDimension] = groupingValue(first, grouping); });
     const missing = new Map<MissingReason, number>();

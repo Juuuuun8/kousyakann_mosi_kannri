@@ -5,9 +5,11 @@ import { makeSyntheticAnswerMarks } from "../../test-fixtures/src/generator.ts";
 import {
   canonicalJson,
   chunkPayloadJson,
+  createPayloadRecords,
   reassemblePayloadJson,
   roundTripPayloadJson,
-} from "../src/codec.ts";
+  verifyPayloadRecords,
+} from "../src/index.ts";
 
 test("canonicalJson sorts object keys but preserves array order", () => {
   assert.equal(canonicalJson({ z: 1, a: { d: 2, c: 3 }, items: [2, 1] }),
@@ -54,4 +56,35 @@ test("missing, duplicate, and mixed chunks fail closed", () => {
 test("a single item that cannot fit is rejected without truncation", () => {
   const payload = makeSyntheticAnswerMarks("subject.synthetic.01", 1);
   assert.throws(() => chunkPayloadJson(payload, 30), /single payload item exceeds maxChars|payload header exceeds maxChars/);
+});
+
+test("Sheet payload records carry verified chunk and whole-payload hashes", async () => {
+  const payload = makeSyntheticAnswerMarks("subject.synthetic.01", 50);
+  const records = await createPayloadRecords({
+    payloadId: "70000000-0000-4000-8000-000000000001",
+    reportId: "70000000-0000-4000-8000-000000000002",
+    subjectDefinitionId: "subject.synthetic.01",
+    payloadFormatVersion: "payload.v1",
+    payload,
+    createdAt: "2026-09-29T00:00:00Z",
+    maxChars: 700,
+  });
+  assert.ok(records.length > 1);
+  assert.deepEqual(await verifyPayloadRecords(records), payload);
+  assert.ok(records.every((record) => record.payloadHash === records[0].payloadHash));
+});
+
+test("payload record verification rejects missing, altered, and mixed chunks", async () => {
+  const base = await createPayloadRecords({
+    payloadId: "70000000-0000-4000-8000-000000000003",
+    reportId: "70000000-0000-4000-8000-000000000004",
+    subjectDefinitionId: "subject.synthetic.01",
+    payloadFormatVersion: "payload.v1",
+    payload: makeSyntheticAnswerMarks("subject.synthetic.01", 50),
+    createdAt: "2026-09-29T00:00:00Z",
+    maxChars: 700,
+  });
+  await assert.rejects(() => verifyPayloadRecords(base.slice(1)), /chunk count is inconsistent/);
+  await assert.rejects(() => verifyPayloadRecords([{ ...base[0], jsonText: `${base[0].jsonText} ` }, ...base.slice(1)]), /chunk hash mismatch/);
+  await assert.rejects(() => verifyPayloadRecords([{ ...base[0], reportId: "70000000-0000-4000-8000-000000000005" }, ...base.slice(1)]), /identity or header mismatch/);
 });

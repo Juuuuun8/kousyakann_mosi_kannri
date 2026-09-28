@@ -86,3 +86,35 @@ test("login prototype does not persist or transmit credentials", async () => {
   assert.match(script, /querySelector\("#password"\)\.value = ""/);
   assert.doesNotMatch(`${html}\n${script}`, /localStorage|sessionStorage|indexedDB|fetch\(|console\./);
 });
+
+test("upload prototype keeps PDF handling local and fails closed before parser connection", async () => {
+  const html = await text("upload.html");
+  const script = await text("src/upload.js");
+  assert.match(html, /登録校舎/u);
+  assert.match(html, /accept="application\/pdf,.pdf"/u);
+  assert.match(html, /id="register"[^>]+disabled/u);
+  assert.match(script, /file\.arrayBuffer\(\)/u);
+  assert.match(script, /crypto\.subtle\.digest\("SHA-256"/u);
+  assert.match(script, /fileInput\.value = ""/u);
+  assert.doesNotMatch(script, /fetch\(|FormData|XMLHttpRequest|localStorage|sessionStorage|indexedDB|console\./u);
+  assert.doesNotMatch(html, /id="file-name"/u);
+});
+
+test("prototype declares keyboard tab semantics and restrictive static headers", async () => {
+  const html = await text("index.html");
+  const app = await text("src/app.js");
+  const headers = await text("_headers");
+  assert.match(html, /role="tablist"/u);
+  assert.match(html, /role="tabpanel"/u);
+  assert.match(app, /ArrowLeft/u);
+  assert.match(app, /aria-selected/u);
+  for (const token of ["frame-ancestors 'none'", "connect-src 'self'", "X-Content-Type-Options: nosniff", "Cache-Control: no-store"]) assert.match(headers, new RegExp(token));
+});
+
+test("ML export prototype requires purpose and explicit handling confirmation", async () => {
+  const app = await text("src/app.js");
+  assert.match(app, /id="export-purpose"/u);
+  assert.match(app, /id="export-confirm"/u);
+  assert.match(app, /id="export-button"[^>]+disabled/u);
+  assert.match(app, /用途限定、適切な保存、利用後の削除/u);
+});

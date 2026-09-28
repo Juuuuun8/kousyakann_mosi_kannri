@@ -19,4 +19,4 @@ export const ML_EXPORT_COLUMNS = [
 ] as const;
 
 export const ML_EXPORT_ALLOWED_IDENTITY_STATUSES = ["RESOLVED", "NEW_CONFIRMED"] as const;
-export const ML_EXPORT_ROLES = ["ADMIN"] as const;
+export const ML_EXPORT_ROLES = ["ADMIN", "AUTH_MANAGER"] as const;

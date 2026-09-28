@@ -19,7 +19,7 @@ const HALF_WIDTH = "0123456789SABCDEFGHNW*()/";
 export function normalizeWidth(value: string): string {
   return [...value].map((character) => {
     const index = FULL_WIDTH.indexOf(character);
-    return index >= 0 ? HALF_WIDTH[index] : character;
+    return index >= 0 ? HALF_WIDTH[index] ?? character : character;
   }).join("");
 }
 
@@ -55,8 +55,9 @@ export function toLayoutLines(items: readonly PdfTextItem[], yTolerance = 1.5, g
   for (const word of sorted) {
     let bucket: { y: number; words: LayoutWord[] } | undefined;
     for (let index = buckets.length - 1; index >= 0 && index >= buckets.length - 3; index -= 1) {
-      if (Math.abs(buckets[index].y - word.y) < yTolerance) {
-        bucket = buckets[index];
+      const candidate = buckets[index];
+      if (candidate && Math.abs(candidate.y - word.y) < yTolerance) {
+        bucket = candidate;
         break;
       }
     }

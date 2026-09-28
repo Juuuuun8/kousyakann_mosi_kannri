@@ -1,0 +1,5 @@
+{
+  "extends": "../contracts/tsconfig.json",
+  "compilerOptions": { "allowImportingTsExtensions": true },
+  "include": ["src/**/*.ts"]
+}

@@ -32,7 +32,7 @@ function median(values: readonly number[]): number {
   if (values.length === 0) return 1;
   const sorted = [...values].sort((left, right) => left - right);
   const middle = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+  return sorted.length % 2 === 0 ? (sorted[middle - 1]! + sorted[middle]!) / 2 : sorted[middle]!;
 }
 
 function targetBlocks(lines: readonly LayoutLine[], pageRight: number, pageBottom: number): readonly TargetBlock[] {
@@ -41,7 +41,7 @@ function targetBlocks(lines: readonly LayoutLine[], pageRight: number, pageBotto
     return match ? [{ preferenceOrder: Number(match[1]), centerX: word.centerX, startY: line.y }] : [];
   }));
   const firstRow = headings.filter((heading) => heading.preferenceOrder <= 5).sort((left, right) => left.centerX - right.centerX);
-  const pitch = median(firstRow.slice(1).map((heading, index) => heading.centerX - firstRow[index].centerX));
+  const pitch = median(firstRow.slice(1).map((heading, index) => heading.centerX - firstRow[index]!.centerX));
   return headings.map((heading) => {
     const nextRowY = Math.min(...headings.filter((candidate) => candidate.startY > heading.startY + 10).map((candidate) => candidate.startY), pageBottom);
     return {

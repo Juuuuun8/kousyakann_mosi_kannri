@@ -4,7 +4,7 @@
 
 ## 現在の状態
 
-会社承認前の設計・準備段階です。本番GAS、職場Google Drive、実データには接続しません。開発統制、分析要件、Google Sheets正本データ契約に加え、初期対象帳票のブラウザ側Parserを実装しています。
+会社承認前の設計・準備段階です。本番GAS、職場Google Drive、実データには接続しません。初期対象帳票Parser、分析集計、正本保存・認証・通信・監査・ML出力の純粋契約、合成UI、CI品質ゲートまでを実装済みです。外部サービスへ接続するアダプタは承認後タスクとして分離しています。
 
 ## 最上位の制約
 
@@ -47,6 +47,12 @@
 - [P1-T13 PIIスキャン初版](docs/tasks/P1-T13-security-pii-scan.md)
 - [P1-T12 合成UIワイヤーフレーム](docs/tasks/P1-T12-frontend-prototype.md)
 - [AUTH-T01 パスワード認証契約](docs/tasks/AUTH-T01-password-contract.md)
+- [P2-T10 CI・型・セキュリティ品質ゲート](docs/tasks/P2-T10-ci-security-quality-gates.md)
+- [P2-T11 正本保存整合性・年度分割契約](docs/tasks/P2-T11-storage-integrity-and-file-routing.md)
+- [P2-T12 認証・通信・監査契約](docs/tasks/P2-T12-auth-transport-audit-contracts.md)
+- [P2-T13 PDF登録・ML出力安全UI](docs/tasks/P2-T13-input-and-export-safety-ui.md)
+- [Phase 3 承認後結合・運用計画](docs/plans/phase-3-integration-and-operations.md)
+- [承認前完了レビュー 2026-09-29](docs/reviews/preapproval-completion-review-2026-09-29.md)
 - [Phase 1 初期決定記録（レビュー待ち）](docs/decisions/phase-1-initial-decisions.md)
 - [実装横断レビュー 2026-09-28](docs/reviews/implementation-review-2026-09-28.md)
 - [個人情報の保存境界](docs/security/privacy-boundary.md)

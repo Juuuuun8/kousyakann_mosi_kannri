@@ -55,8 +55,8 @@ export function parseAdditionalSubjectMetrics(page: PdfPageText): readonly Parse
     if (line.y <= convertedHeading.y + 3 || line.y > convertedHeading.y + 140) return [];
     const raw = wordsText(line.words.filter((word) => word.centerX >= convertedLeft && word.centerX < convertedRight));
     const match = raw.match(/^(.+?)(?:[*＊#])?(\d+|-+)\/(\d+|-+)$/u);
-    if (!match || !/[ぁ-んァ-ヶ一-龯]/u.test(match[1])) return [];
-    const subjectRaw = normalizeSubjectLabel(match[1]);
+    if (!match || !/[ぁ-んァ-ヶ一-龯]/u.test(match[1]!)) return [];
+    const subjectRaw = normalizeSubjectLabel(match[1]!);
     const score = numberOrNull(match[2]);
     const maxScore = numberOrNull(match[3]);
     return [{
@@ -75,8 +75,8 @@ export function parseAdditionalSubjectMetrics(page: PdfPageText): readonly Parse
     if (line.y <= privateHeading.y + 3 || line.y > privateHeading.y + 65) return [];
     const raw = wordsText(line.words.filter((word) => word.centerX >= privateLeft));
     const match = raw.match(/^(.+?)(\d+(?:\.\d+)?|-+)$/u);
-    if (!match || !/[ぁ-んァ-ヶ一-龯]/u.test(match[1])) return [];
-    const subjectRaw = normalizeSubjectLabel(match[1]);
+    if (!match || !/[ぁ-んァ-ヶ一-龯]/u.test(match[1]!)) return [];
+    const subjectRaw = normalizeSubjectLabel(match[1]!);
     const deviation = numberOrNull(match[2]);
     return [{
       subjectRaw,

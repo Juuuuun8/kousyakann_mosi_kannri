@@ -98,15 +98,15 @@ function quantile(sorted: readonly number[], position: number): number {
   const index = (sorted.length - 1) * position;
   const lower = Math.floor(index);
   const upper = Math.ceil(index);
-  if (lower === upper) return sorted[lower];
-  return sorted[lower] + (sorted[upper] - sorted[lower]) * (index - lower);
+  if (lower === upper) return sorted[lower]!;
+  return sorted[lower]! + (sorted[upper]! - sorted[lower]!) * (index - lower);
 }
 
 function quantiles(values: readonly number[]): AnalyticsQuantiles | null {
   if (values.length === 0) return null;
   const sorted = [...values].sort((left, right) => left - right);
   return {
-    minimum: sorted[0],
+    minimum: sorted[0]!,
     p25: quantile(sorted, 0.25),
     median: quantile(sorted, 0.5),
     p75: quantile(sorted, 0.75),
@@ -206,6 +206,7 @@ function metricValue(metricId: AnalyticsMetricId, rows: readonly JoinedRow[], sa
 
 function analyticsGroup(key: string, rows: readonly JoinedRow[], groupBy: readonly AnalyticsGrouping[]): AnalyticsGroup {
   const first = rows[0];
+  if (!first) throw new AnalyticsExecutionError([{ code: "INVALID_RESULT", message: "analytics group cannot be empty" }]);
   const dimensions: Partial<Record<AnalyticsDimension, string>> = {};
   for (const grouping of groupBy) {
     if (grouping !== "overall") dimensions[grouping as AnalyticsDimension] = groupingValue(first, grouping);

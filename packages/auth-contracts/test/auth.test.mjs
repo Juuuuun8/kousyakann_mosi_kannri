@@ -3,10 +3,15 @@ import test from "node:test";
 
 import {
   PASSWORD_POLICY,
+  authorizeAction,
   constantTimeTextEqual,
+  createSessionRecord,
   derivePasswordVerifier,
+  evaluatePasswordLogin,
   generatePasswordSalt,
   normalizeLoginEmail,
+  sessionCookie,
+  sessionMatches,
   validatePasswordLoginRequest,
   validatePasswordValue,
   validateUserAccessRecord,
@@ -70,4 +75,64 @@ test("PBKDF2 verifier is deterministic, salted, and constant-time comparable", a
   const second = await derivePasswordVerifier(password, secondSalt);
   assert.equal(constantTimeTextEqual(first, repeated), true);
   assert.equal(constantTimeTextEqual(first, second), false);
+});
+
+test("password evaluation authenticates, requires initial change, and clears failures", async () => {
+  const password = "synthetic passphrase for login";
+  const salt = generatePasswordSalt();
+  const verifier = await derivePasswordVerifier(password, salt);
+  const record = user({ passwordSalt: salt, passwordVerifier: verifier, failedAttemptCount: 2, lockedUntil: null });
+  const result = await evaluatePasswordLogin({ email: record.email, password }, record, { salt, verifier }, new Date("2026-09-29T00:00:00Z"));
+  assert.deepEqual(result.publicResult, { ok: true, code: "PASSWORD_CHANGE_REQUIRED" });
+  assert.equal(result.updatedUser.failedAttemptCount, 0);
+  assert.equal(result.updatedUser.lockedUntil, null);
+});
+
+test("wrong, absent, revoked, and locked identities share one public failure", async () => {
+  const password = "synthetic passphrase for login";
+  const salt = generatePasswordSalt();
+  const verifier = await derivePasswordVerifier(password, salt);
+  const dummy = { salt, verifier };
+  const request = { email: "synthetic.user@example.invalid", password: "different synthetic passphrase" };
+  const current = user({ passwordSalt: salt, passwordVerifier: verifier, mustChangePassword: false });
+  const results = await Promise.all([
+    evaluatePasswordLogin(request, current, dummy, new Date("2026-09-29T00:00:00Z")),
+    evaluatePasswordLogin(request, null, dummy, new Date("2026-09-29T00:00:00Z")),
+    evaluatePasswordLogin(request, user({ ...current, status: "REVOKED" }), dummy, new Date("2026-09-29T00:00:00Z")),
+    evaluatePasswordLogin(request, user({ ...current, lockedUntil: "2026-09-29T00:10:00Z" }), dummy, new Date("2026-09-29T00:00:00Z")),
+  ]);
+  assert.ok(results.every((result) => JSON.stringify(result.publicResult) === JSON.stringify({ ok: false, code: "AUTHENTICATION_FAILED" })));
+});
+
+test("five failures lock the account for fifteen minutes", async () => {
+  const password = "synthetic passphrase for login";
+  const salt = generatePasswordSalt();
+  const verifier = await derivePasswordVerifier(password, salt);
+  const dummy = { salt, verifier };
+  let record = user({ passwordSalt: salt, passwordVerifier: verifier, mustChangePassword: false });
+  for (let index = 0; index < 5; index += 1) {
+    const result = await evaluatePasswordLogin({ email: record.email, password: "different synthetic passphrase" }, record, dummy, new Date("2026-09-29T00:00:00Z"));
+    record = result.updatedUser;
+  }
+  assert.equal(record.failedAttemptCount, 5);
+  assert.equal(record.lockedUntil, "2026-09-29T00:15:00.000Z");
+});
+
+test("role authorization preserves INPUT register-only and initial-change gates", () => {
+  const inputUser = user({ mustChangePassword: false });
+  assert.equal(authorizeAction(inputUser, "CREATE_REPORT"), true);
+  assert.equal(authorizeAction(inputUser, "READ_REPORTS"), false);
+  assert.equal(authorizeAction(user({ role: "ADMIN", mustChangePassword: false }), "EXPORT_ML"), true);
+  assert.equal(authorizeAction(user({ role: "AUTH_MANAGER", mustChangePassword: false }), "RESET_CREDENTIAL"), true);
+  assert.equal(authorizeAction(user({ role: "ADMIN", status: "REVOKED", mustChangePassword: false }), "ANALYZE"), false);
+  assert.equal(authorizeAction(user({ role: "ADMIN", mustChangePassword: true }), "ANALYZE"), false);
+  assert.equal(authorizeAction(user({ role: "ADMIN", mustChangePassword: true }), "CHANGE_PASSWORD"), true);
+});
+
+test("session stores only a hash and produces a strict secure cookie", async () => {
+  const issued = await createSessionRecord("synthetic.user@example.invalid", new Date("2026-09-29T00:00:00Z"), 3600);
+  assert.notEqual(issued.record.sessionHash, issued.token);
+  assert.equal(await sessionMatches(issued.token, issued.record, new Date("2026-09-29T00:30:00Z")), true);
+  assert.equal(await sessionMatches(issued.token, issued.record, new Date("2026-09-29T01:00:00Z")), false);
+  assert.match(sessionCookie(issued.token, 3600), /HttpOnly; Secure; SameSite=Strict/u);
 });

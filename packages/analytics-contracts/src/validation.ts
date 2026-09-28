@@ -197,13 +197,14 @@ export function validateAnalyticsResult(value: unknown): AnalyticsValidationResu
       issues.push(issue(path, "GROUP_RESULT", "group result must contain group and metrics"));
       return;
     }
+    const groupMeta = group.group;
     rejectUnknownKeys(group, ["group", "metrics"], path, issues);
-    rejectUnknownKeys(group.group, ["groupKey", "dimensions", "subjectDefinitionId", "sampleCount", "excludedCount", "missingCounts"], `${path}.group`, issues);
-    if (!isString(group.group.groupKey) || group.group.groupKey.length === 0) issues.push(issue(`${path}.group.groupKey`, "GROUP_KEY", "groupKey is required"));
-    if (!isInteger(group.group.sampleCount) || group.group.sampleCount < 0) issues.push(issue(`${path}.group.sampleCount`, "COUNT", "sampleCount must be non-negative"));
-    if (!isInteger(group.group.excludedCount) || group.group.excludedCount < 0) issues.push(issue(`${path}.group.excludedCount`, "COUNT", "excludedCount must be non-negative"));
-    if (!Array.isArray(group.group.missingCounts)) issues.push(issue(`${path}.group.missingCounts`, "ARRAY", "missingCounts must be an array"));
-    else group.group.missingCounts.forEach((missing, missingIndex) => {
+    rejectUnknownKeys(groupMeta, ["groupKey", "dimensions", "subjectDefinitionId", "sampleCount", "excludedCount", "missingCounts"], `${path}.group`, issues);
+    if (!isString(groupMeta.groupKey) || groupMeta.groupKey.length === 0) issues.push(issue(`${path}.group.groupKey`, "GROUP_KEY", "groupKey is required"));
+    if (!isInteger(groupMeta.sampleCount) || groupMeta.sampleCount < 0) issues.push(issue(`${path}.group.sampleCount`, "COUNT", "sampleCount must be non-negative"));
+    if (!isInteger(groupMeta.excludedCount) || groupMeta.excludedCount < 0) issues.push(issue(`${path}.group.excludedCount`, "COUNT", "excludedCount must be non-negative"));
+    if (!Array.isArray(groupMeta.missingCounts)) issues.push(issue(`${path}.group.missingCounts`, "ARRAY", "missingCounts must be an array"));
+    else groupMeta.missingCounts.forEach((missing, missingIndex) => {
       const missingPath = `${path}.group.missingCounts[${missingIndex}]`;
       if (!isRecord(missing)) issues.push(issue(missingPath, "OBJECT", "missing count must be an object"));
       else {
@@ -212,19 +213,20 @@ export function validateAnalyticsResult(value: unknown): AnalyticsValidationResu
         if (!isInteger(missing.count) || missing.count < 0) issues.push(issue(`${missingPath}.count`, "COUNT", "count must be non-negative"));
       }
     });
-    if (!isRecord(group.group.dimensions)) issues.push(issue(`${path}.group.dimensions`, "OBJECT", "dimensions must be an object"));
+    if (!isRecord(groupMeta.dimensions)) issues.push(issue(`${path}.group.dimensions`, "OBJECT", "dimensions must be an object"));
     else {
-      const dimensionKeys = Object.keys(group.group.dimensions);
+      const dimensions = groupMeta.dimensions;
+      const dimensionKeys = Object.keys(dimensions);
       dimensionKeys.filter((key) => !isOneOf(ANALYTICS_DIMENSIONS, key)).forEach((key) => issues.push(issue(`${path}.group.dimensions.${key}`, "DIMENSION", "unknown or unsafe dimension")));
-      dimensionKeys.forEach((key) => { if (!isString(group.group.dimensions[key]) || group.group.dimensions[key].length === 0 || group.group.dimensions[key].length > 256) issues.push(issue(`${path}.group.dimensions.${key}`, "STRING", "dimension value must be 1-256 characters")); });
+      dimensionKeys.forEach((key) => { const dimension = dimensions[key]; if (!isString(dimension) || dimension.length === 0 || dimension.length > 256) issues.push(issue(`${path}.group.dimensions.${key}`, "STRING", "dimension value must be 1-256 characters")); });
       const expectedDimensions = isRecord(value.query) && Array.isArray(value.query.groupBy) ? value.query.groupBy.map(String).filter((key) => key !== "overall") : [];
       if (dimensionKeys.length !== expectedDimensions.length || expectedDimensions.some((key) => !dimensionKeys.includes(key))) issues.push(issue(`${path}.group.dimensions`, "DIMENSION_SET", "dimensions must exactly match non-overall query groupings"));
     }
-    if (group.group.subjectDefinitionId !== null && (!isString(group.group.subjectDefinitionId) || !ID_RE.test(group.group.subjectDefinitionId))) issues.push(issue(`${path}.group.subjectDefinitionId`, "ID_OR_NULL", "subjectDefinitionId must be a contract identifier or null"));
+    if (groupMeta.subjectDefinitionId !== null && (!isString(groupMeta.subjectDefinitionId) || !ID_RE.test(groupMeta.subjectDefinitionId))) issues.push(issue(`${path}.group.subjectDefinitionId`, "ID_OR_NULL", "subjectDefinitionId must be a contract identifier or null"));
     if (isRecord(value.query) && Array.isArray(value.query.groupBy)) {
       const subjectGrouped = value.query.groupBy.includes("subject");
-      if (subjectGrouped && group.group.subjectDefinitionId !== group.group.dimensions.subject) issues.push(issue(`${path}.group.subjectDefinitionId`, "SUBJECT_DIMENSION", "must match the subject dimension"));
-      if (!subjectGrouped && group.group.subjectDefinitionId !== null) issues.push(issue(`${path}.group.subjectDefinitionId`, "SUBJECT_DIMENSION", "must be null when subject is not grouped"));
+      if (subjectGrouped && groupMeta.subjectDefinitionId !== (isRecord(groupMeta.dimensions) ? groupMeta.dimensions.subject : undefined)) issues.push(issue(`${path}.group.subjectDefinitionId`, "SUBJECT_DIMENSION", "must match the subject dimension"));
+      if (!subjectGrouped && groupMeta.subjectDefinitionId !== null) issues.push(issue(`${path}.group.subjectDefinitionId`, "SUBJECT_DIMENSION", "must be null when subject is not grouped"));
     }
     group.metrics.forEach((metric, metricIndex) => {
       const metricPath = `${path}.metrics[${metricIndex}]`;

@@ -94,7 +94,7 @@ function cleanSubjectLabel(label: string): string {
   let parts = label.split(/[\s\u3000]+/u).filter(Boolean);
   if (parts[0]?.startsWith("総合")) return parts.length === 1 ? normalizeCompact(parts[0]) : `総合(${parts.slice(1).join("")})`;
   parts = parts.filter((part) => !DROP_LABELS.has(part));
-  if (parts.length > 1 && ["数学①", "数学②", "情報", "英語", "国語"].includes(parts[0])) parts = parts.slice(1);
+  if (parts.length > 1 && ["数学①", "数学②", "情報", "英語", "国語"].includes(parts[0]!)) parts = parts.slice(1);
   return normalizeCompact(parts.join(""));
 }
 
@@ -124,24 +124,24 @@ export function parseHeader(page: PdfPageText): ParsedHeader {
     const joined = tokens.join(" ");
     const school = joined.match(/(?:^|\s)(\d{5})\s+([^\d]+?)(?=\s|$)/u);
     if (school) {
-      fields.push({ key: "school_code_raw", rawValue: school[1], pageNumber: page.pageNumber, sourceLabel: "学校コード" });
-      fields.push({ key: "school_name_raw", rawValue: school[2].trim(), pageNumber: page.pageNumber, sourceLabel: "学校" });
+      fields.push({ key: "school_code_raw", rawValue: school[1]!, pageNumber: page.pageNumber, sourceLabel: "学校コード" });
+      fields.push({ key: "school_name_raw", rawValue: school[2]!.trim(), pageNumber: page.pageNumber, sourceLabel: "学校" });
     }
     const grade = joined.match(/(\d+)年\s+(\S+)\s+クラス\s+(\S+)\s+番/u);
     if (grade) {
-      fields.push({ key: "grade_raw", rawValue: grade[1], pageNumber: page.pageNumber, sourceLabel: "学年" });
-      fields.push({ key: "class_raw", rawValue: grade[2], pageNumber: page.pageNumber, sourceLabel: "クラス" });
-      fields.push({ key: "local_number_raw", rawValue: grade[3], pageNumber: page.pageNumber, sourceLabel: "番号" });
+      fields.push({ key: "grade_raw", rawValue: grade[1]!, pageNumber: page.pageNumber, sourceLabel: "学年" });
+      fields.push({ key: "class_raw", rawValue: grade[2]!, pageNumber: page.pageNumber, sourceLabel: "クラス" });
+      fields.push({ key: "local_number_raw", rawValue: grade[3]!, pageNumber: page.pageNumber, sourceLabel: "番号" });
     }
     const candidate = joined.match(/((?:[ァ-ヶー]+\s*)+)\s+(\d{6,8})(?:\s|$)/u);
     if (candidate) {
-      fields.push({ key: "student_name_kana_raw", rawValue: candidate[1].trim().normalize("NFC"), pageNumber: page.pageNumber, sourceLabel: "氏名カナ" });
-      fields.push({ key: "exam_candidate_id", rawValue: candidate[2], pageNumber: page.pageNumber, sourceLabel: "受験番号" });
-      examCandidateId = candidate[2];
+      fields.push({ key: "student_name_kana_raw", rawValue: candidate[1]!.trim().normalize("NFC"), pageNumber: page.pageNumber, sourceLabel: "氏名カナ" });
+      fields.push({ key: "exam_candidate_id", rawValue: candidate[2]!, pageNumber: page.pageNumber, sourceLabel: "受験番号" });
+      examCandidateId = candidate[2]!;
     }
   }
   const examMatch = normalizeWidth(page.text).replace(/[\s\u3000]+/gu, "").match(/(\d{4}年度第\d+回全統共通テスト模試)/u);
-  if (examMatch) fields.push({ key: "exam_event_raw", rawValue: examMatch[1], pageNumber: page.pageNumber, sourceLabel: "模試" });
+  if (examMatch) fields.push({ key: "exam_event_raw", rawValue: examMatch[1]!, pageNumber: page.pageNumber, sourceLabel: "模試" });
   return { fields, examCandidateId };
 }
 
@@ -154,17 +154,17 @@ export function parseSubjectScores(page: PdfPageText): readonly ParsedSubjectSco
     const raw = line.words.filter((word) => word.x0 < summaryRight).map((word) => normalizeWidth(word.text)).join(" ").replace(/\s+/gu, " ").trim();
     const match = raw.match(SUBJECT_LINE);
     if (!match) continue;
-    const subjectRaw = cleanSubjectLabel(match[1]);
+    const subjectRaw = cleanSubjectLabel(match[1]!);
     if (subjectRaw.length === 0 || (!/[ぁ-んァ-ヶ一-龯]/u.test(subjectRaw) && !subjectRaw.includes("英語"))) continue;
-    const missingReason: MissingReason | null = numberOrNull(match[3]) === null ? "NOT_TAKEN" : null;
+    const missingReason: MissingReason | null = numberOrNull(match[3]!) === null ? "NOT_TAKEN" : null;
     scores.push({
       subjectRaw,
       subjectDefinitionId: subjectDefinitionIdFor(subjectRaw),
       attentionCodeRaw: match[2] ?? null,
-      score: numberOrNull(match[3]), maxScore: numberOrNull(match[4]), deviation: numberOrNull(match[5]), abilityLevel: match[6] ?? null,
-      nationalAverage: numberOrNull(match[7]), nationalRank: nullableInteger(match[8]), nationalPopulation: nullableInteger(match[9]),
-      currentStudentAverage: numberOrNull(match[10]), graduateAverage: numberOrNull(match[11]), currentRank: nullableInteger(match[12]), currentPopulation: nullableInteger(match[13]),
-      schoolDeviation: numberOrNull(match[14]), schoolAverage: numberOrNull(match[15]), schoolRank: nullableInteger(match[16]), schoolPopulation: nullableInteger(match[17]),
+      score: numberOrNull(match[3]!), maxScore: numberOrNull(match[4]!), deviation: numberOrNull(match[5]!), abilityLevel: match[6] ?? null,
+      nationalAverage: numberOrNull(match[7]!), nationalRank: nullableInteger(match[8]!), nationalPopulation: nullableInteger(match[9]!),
+      currentStudentAverage: numberOrNull(match[10]!), graduateAverage: numberOrNull(match[11]!), currentRank: nullableInteger(match[12]!), currentPopulation: nullableInteger(match[13]!),
+      schoolDeviation: numberOrNull(match[14]!), schoolAverage: numberOrNull(match[15]!), schoolRank: nullableInteger(match[16]!), schoolPopulation: nullableInteger(match[17]!),
       missingReason,
     });
   }

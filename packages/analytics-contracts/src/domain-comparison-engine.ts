@@ -119,13 +119,13 @@ function quantile(sorted: readonly number[], position: number): number {
   const index = (sorted.length - 1) * position;
   const lower = Math.floor(index);
   const upper = Math.ceil(index);
-  return lower === upper ? sorted[lower] : sorted[lower] + (sorted[upper] - sorted[lower]) * (index - lower);
+  return lower === upper ? sorted[lower]! : sorted[lower]! + (sorted[upper]! - sorted[lower]!) * (index - lower);
 }
 
 function quantiles(input: readonly number[]): AnalyticsQuantiles | null {
   if (!input.length) return null;
   const sorted = [...input].sort((a, b) => a - b);
-  return { minimum: sorted[0], p25: quantile(sorted, .25), median: quantile(sorted, .5), p75: quantile(sorted, .75), maximum: sorted.at(-1) as number };
+  return { minimum: sorted[0]!, p25: quantile(sorted, .25), median: quantile(sorted, .5), p75: quantile(sorted, .75), maximum: sorted.at(-1)! };
 }
 
 function suppressed(metricId: AnalyticsMetricId, displayType: AnalyticsMetricValue["displayType"], unit: AnalyticsMetricValue["unit"], denominator: number, reason: "SMALL_GROUP" | "INSUFFICIENT_DATA" | "IDENTITY_UNRESOLVED"): AnalyticsMetricValue {

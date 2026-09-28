@@ -1,4 +1,5 @@
 import type { PayloadJson } from "../../contracts/src/types.ts";
+import { validatePayloadJson } from "../../contracts/src/validation.ts";
 
 /** A Sheet-cell-safe chunk of one versioned payload. */
 export interface PayloadChunkText {
@@ -120,7 +121,7 @@ export function chunkPayloadJson(
 export function reassemblePayloadJson(chunks: readonly PayloadChunkText[]): PayloadJson {
   if (chunks.length === 0) throw new Error("at least one payload chunk is required");
 
-  const expectedCount = chunks[0].chunkCount;
+  const expectedCount = chunks[0]!.chunkCount;
   if (!Number.isInteger(expectedCount) || expectedCount < 1 || expectedCount !== chunks.length) {
     throw new Error("chunk count is inconsistent");
   }
@@ -160,9 +161,11 @@ export function reassemblePayloadJson(chunks: readonly PayloadChunkText[]): Payl
     parsedEnvelopes.push(envelope);
   }
 
-  const first = parsedEnvelopes[0];
+  const first = parsedEnvelopes[0]!;
   const items = parsedEnvelopes.flatMap((envelope) => [...envelope.items]);
-  return { ...first, items } as PayloadJson;
+  const rebuilt: unknown = { ...first, items };
+  if (!validatePayloadJson(rebuilt).ok) throw new Error("reassembled payload violates the canonical contract");
+  return rebuilt as PayloadJson;
 }
 
 export function roundTripPayloadJson(payload: PayloadJson, maxChars = 40000): PayloadJson {
