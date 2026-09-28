@@ -8,6 +8,11 @@ export const ANALYTICS_DIMENSIONS = [
   "target_school",
   "target_rank",
   "ability_level",
+  "graduation_year",
+  "major_question",
+  "question",
+  "judgement",
+  "baseline_band",
 ] as const;
 
 export const ANALYTICS_GROUPINGS = [
@@ -21,29 +26,66 @@ export const ANALYTICS_GROUPINGS = [
   "target_school",
   "target_rank",
   "ability_level",
+  "graduation_year",
+  "major_question",
+  "question",
+  "judgement",
+  "baseline_band",
 ] as const;
 
 export const ANALYTICS_METRIC_IDS = [
   "report_count",
   "person_count",
   "subject_taker_count",
+  "participation_rate",
+  "comparable_person_count",
+  "excluded_rate",
+  "data_completeness_rate",
+  "schema_warning_rate",
   "score_mean",
   "score_median",
   "score_rate_mean",
+  "score_rate_distribution",
   "deviation_mean",
   "deviation_median",
+  "deviation_distribution",
   "score_standard_deviation",
   "score_quantiles",
   "missing_rate",
+  "national_gap_mean",
+  "school_gap_mean",
+  "same_ability_gap_mean",
   "domain_score_rate_mean",
+  "domain_score_rate_distribution",
+  "domain_change_from_previous_event",
   "item_correct_rate",
+  "item_wrong_rate",
+  "item_partial_rate",
   "item_no_answer_rate",
+  "item_extra_mark_rate",
+  "item_result_by_position",
   "target_judgement_distribution",
+  "target_judgement_transition",
   "target_border_gap",
+  "target_border_gap_distribution",
   "change_from_previous_event",
+  "change_distribution",
+  "change_by_baseline_band",
+  "subject_balance_range",
 ] as const;
 
 export const ANALYTICS_ROLES = ["ADMIN"] as const;
 export const SUPPRESSION_REASONS = ["SMALL_GROUP", "INSUFFICIENT_DATA", "IDENTITY_UNRESOLVED"] as const;
+export const ANALYTICS_DISPLAY_TYPES = ["scalar", "distribution", "series", "breakdown", "matrix"] as const;
+export const ANALYTICS_UNITS = [
+  "count",
+  "score",
+  "rate",
+  "percentage_point",
+  "deviation",
+  "rank",
+  "distribution",
+  "text",
+] as const;
 export const ANALYTICS_RESULT_VERSION = "analytics-result.v1";
 export const DEFAULT_SUPPRESSION_THRESHOLD = 5;

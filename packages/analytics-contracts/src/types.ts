@@ -8,9 +8,11 @@ import type {
 } from "../../contracts/src/types.ts";
 import type {
   ANALYTICS_DIMENSIONS,
+  ANALYTICS_DISPLAY_TYPES,
   ANALYTICS_GROUPINGS,
   ANALYTICS_METRIC_IDS,
   ANALYTICS_ROLES,
+  ANALYTICS_UNITS,
   SUPPRESSION_REASONS,
 } from "./constants.ts";
 
@@ -19,6 +21,8 @@ export type AnalyticsGrouping = (typeof ANALYTICS_GROUPINGS)[number];
 export type AnalyticsMetricId = (typeof ANALYTICS_METRIC_IDS)[number];
 export type AnalyticsRole = (typeof ANALYTICS_ROLES)[number];
 export type SuppressionReason = (typeof SUPPRESSION_REASONS)[number];
+export type AnalyticsDisplayType = (typeof ANALYTICS_DISPLAY_TYPES)[number];
+export type AnalyticsUnit = (typeof ANALYTICS_UNITS)[number];
 
 export interface AnalyticsFilter {
   readonly examEventIds?: readonly ExamEventId[];
@@ -67,11 +71,32 @@ export interface AnalyticsGroup {
 
 export interface AnalyticsMetricValue {
   readonly metricId: AnalyticsMetricId;
+  readonly displayType: AnalyticsDisplayType;
   readonly value: number | null;
-  readonly unit: "count" | "score" | "rate" | "deviation" | "distribution" | "text";
+  readonly unit: AnalyticsUnit;
   readonly denominator: number | null;
+  readonly quantiles: AnalyticsQuantiles | null;
+  readonly points: readonly AnalyticsPoint[];
   readonly suppressed: boolean;
   readonly suppressionReason: SuppressionReason | null;
+}
+
+export interface AnalyticsQuantiles {
+  readonly minimum: number;
+  readonly p25: number;
+  readonly median: number;
+  readonly p75: number;
+  readonly maximum: number;
+}
+
+export interface AnalyticsPoint {
+  /** Stable category, event, band, row, or column ID. */
+  readonly key: string;
+  readonly seriesKey: string | null;
+  readonly value: number | null;
+  readonly denominator: number | null;
+  readonly sampleCount: number;
+  readonly missingCount: number;
 }
 
 export interface AnalyticsGroupResult {

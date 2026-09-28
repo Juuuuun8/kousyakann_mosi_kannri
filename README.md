@@ -16,6 +16,8 @@
 - 情報損失なく復元検証できる場合、設問別成績等を版管理されたJSONとしてGoogle Sheetsセルへ正本保存できる。
 - INPUTは登録のみ、ADMINは全データ閲覧・分析を可能とする。
 - 未知または検証不合格のPDFは登録しない。
+- 分析は指導対象・指導内容を自動決定せず、講師・社員が判断するための分布、比較、時系列、設問結果、志望校判定、品質情報を提示する。
+- パスワード認証は仕様変更提案中であり、平文をSheetへ保存しない契約・合成UIだけを先行実装する。
 
 ## 計画文書
 
@@ -35,7 +37,9 @@
 - [P1-T11 ML CSV契約](docs/tasks/P1-T11-export-contracts.md)
 - [P1-T13 PIIスキャン初版](docs/tasks/P1-T13-security-pii-scan.md)
 - [P1-T12 合成UIワイヤーフレーム](docs/tasks/P1-T12-frontend-prototype.md)
+- [AUTH-T01 パスワード認証契約](docs/tasks/AUTH-T01-password-contract.md)
 - [Phase 1 初期決定記録（レビュー待ち）](docs/decisions/phase-1-initial-decisions.md)
+- [実装横断レビュー 2026-09-28](docs/reviews/implementation-review-2026-09-28.md)
 - [個人情報の保存境界](docs/security/privacy-boundary.md)
 - [仕様トレーサビリティ](docs/requirements/spec-traceability.md)
 - [仕様変更提案](docs/changes/spec-change-proposals.md)

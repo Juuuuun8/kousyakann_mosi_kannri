@@ -40,8 +40,8 @@ test("analytics result contract requires suppression metadata", () => {
         missingCounts: [],
       },
       metrics: [
-        { metricId: "score_mean", value: 61.5, unit: "score", denominator: 12, suppressed: false, suppressionReason: null },
-        { metricId: "deviation_mean", value: null, unit: "deviation", denominator: 3, suppressed: true, suppressionReason: "SMALL_GROUP" },
+        { metricId: "score_mean", displayType: "scalar", value: 61.5, unit: "score", denominator: 12, quantiles: null, points: [], suppressed: false, suppressionReason: null },
+        { metricId: "deviation_mean", displayType: "scalar", value: null, unit: "deviation", denominator: 3, quantiles: null, points: [], suppressed: true, suppressionReason: "SMALL_GROUP" },
       ],
     }],
     warnings: [],
@@ -50,4 +50,32 @@ test("analytics result contract requires suppression metadata", () => {
   const invalid = structuredClone(result);
   invalid.groups[0].metrics[1].suppressionReason = null;
   assert.equal(validateAnalyticsResult(invalid).ok, false);
+});
+
+test("analytics result supports evidence-rich distributions and blocks suppressed leakage", () => {
+  const result = {
+    resultVersion: ANALYTICS_RESULT_VERSION,
+    generatedAt: "2026-09-28T00:00:00Z",
+    query: { ...validQuery, metricIds: ["score_rate_distribution"] },
+    groups: [{
+      group: { groupKey: "overall", dimensions: {}, subjectDefinitionId: null, sampleCount: 120, excludedCount: 8, missingCounts: [] },
+      metrics: [{
+        metricId: "score_rate_distribution",
+        displayType: "distribution",
+        value: null,
+        unit: "rate",
+        denominator: 120,
+        quantiles: { minimum: 0.12, p25: 0.48, median: 0.63, p75: 0.76, maximum: 0.98 },
+        points: [{ key: "band.60-70", seriesKey: null, value: 31, denominator: 120, sampleCount: 31, missingCount: 0 }],
+        suppressed: false,
+        suppressionReason: null,
+      }],
+    }],
+    warnings: [],
+  };
+  assert.equal(validateAnalyticsResult(result).ok, true);
+  const leaked = structuredClone(result);
+  leaked.groups[0].metrics[0].suppressed = true;
+  leaked.groups[0].metrics[0].suppressionReason = "SMALL_GROUP";
+  assert.equal(validateAnalyticsResult(leaked).ok, false);
 });

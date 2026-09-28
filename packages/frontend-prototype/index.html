@@ -12,7 +12,7 @@
         <p class="eyebrow">Kousyakann Mosi Kannri / prototype</p>
         <h1>模試成績分析</h1>
       </div>
-      <div class="role-badge" aria-label="現在の権限">ADMIN · 全校舎閲覧</div>
+      <div class="topbar-actions"><span class="role-badge" aria-label="現在の権限">ADMIN · 全校舎閲覧</span><a class="role-badge topbar-link" href="./login.html">ログイン画面</a></div>
     </header>
 
     <main class="shell">
@@ -38,9 +38,10 @@
           <label>校舎<select><option>全校舎</option><option>合成校舎A</option><option>合成校舎B</option></select></label>
           <label>高校<select><option>全高校</option><option>合成高校A</option><option>合成高校B</option></select></label>
           <label>科目<select><option>全科目</option><option>英語</option><option>数学</option><option>国語</option></select></label>
+          <label>比較基準<select><option>全体</option><option>全国掲載値</option><option>同学力帯掲載値</option><option>前回同一Person</option></select></label>
           <label>抑制人数<input type="number" value="5" min="1" step="1"></label>
         </div>
-        <div class="filter-footnote">母数・除外数・欠損理由は各カードに表示。小人数群の値は自動抑制。</div>
+        <div class="filter-footnote">システムは観測値と比較根拠を提示します。解釈と指導方針は、講師・社員が判断します。母数・除外数・欠損理由は各表示に併記します。</div>
       </section>
 
       <section class="state-preview" aria-labelledby="state-title">

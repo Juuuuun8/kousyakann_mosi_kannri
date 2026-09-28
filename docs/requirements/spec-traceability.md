@@ -22,6 +22,9 @@
 | REQ-OTP-001 | 6.1, 9.1 | ACTIVE利用者だけへOTPを送る | traceability.md | 認証試験 |
 | REQ-SESSION-001 | 6.2, 9.2 | セッションIDをHttpOnly Secure SameSite Strict Cookieに置く | privacy-boundary.md | Cookie試験 |
 | REQ-SESSION-002 | 新規制約 | 利用者と結び付くOTP・セッション状態を所定のGoogle Sheets以外へ保存しない | privacy-boundary.md, SPEC-CHANGE-002 | 保存先監査 |
+| REQ-PASSWORD-001 | SPEC-CHANGE-005（承認待ち） | パスワード平文・可逆値を永続保存せず、Salt付き適応的検証値だけを所定Usersシートへ保存する | packages/auth-contracts, privacy-boundary.md | 列契約・導出試験 |
+| REQ-PASSWORD-002 | SPEC-CHANGE-005（承認待ち） | 認証失敗を共通化し、回数制限・ロック・競合制御を行う | packages/auth-contracts | 認証・同時実行試験 |
+| REQ-PASSWORD-003 | SPEC-CHANGE-005（承認待ち） | パスワードログイン後もRoleとStatusを各APIで再確認する | packages/auth-contracts | 認可・失効試験 |
 | REQ-PARSER-001 | 6.3, 7.1 | Parserをdetect extract validate normalizeに分離する | phase-plan, packages/contracts, packages/parsers/core | 契約試験 |
 | REQ-PARSER-002 | 7.1 | ParserVersionを成績レコードへ保存する | packages/contracts, packages/parsers/core | 保存試験 |
 | REQ-PARSER-003 | 6.3, 7.1 | 未知スキームをfail-closedで拒否する | packages/parsers/core, packages/parsers/kawai | 未知PDF試験 |
@@ -43,6 +46,7 @@
 | REQ-DATA-010 | 7、8 | 原表記を保持したまま正規化値と各Versionを保存する | canonical-data-model.md, packages/contracts | round-trip試験 |
 | REQ-ANALYSIS-003 | ユーザー要件 | 校舎、学校、志望校、科目、個人、回次で比較・推移分析できる | analysis-catalog.md, packages/analytics-contracts | 指標・フィルタ試験 |
 | REQ-ANALYSIS-004 | 6.6、10.2 | 集計へ対象人数、除外数、欠損理由を付け、小人数群を抑制可能にする | analysis-catalog.md, packages/analytics-contracts | 母数・抑制試験 |
+| REQ-ANALYSIS-005 | ユーザー要件 | システムは指導を自動決定せず、講師が判断できる分布・比較・時系列・設問結果・品質根拠を提示する | analysis-catalog.md, packages/analytics-contracts, packages/frontend-prototype | 指標・表示文言試験 |
 | REQ-LOG-001 | 11.1 | 成功・失敗・操作種別・RequestIDを監査記録する | privacy-boundary.md | ログ試験 |
 | REQ-LOG-002 | 6.1, 11.1 | OTP、セッションID、Secret、PDF本文をログへ出さない | privacy-boundary.md | 禁止値試験 |
 | REQ-BACKUP-001 | 6.11, 11.2 | Drive内で定期バックアップし世代管理する | traceability.md | バックアップ試験 |
