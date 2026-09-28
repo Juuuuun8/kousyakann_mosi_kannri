@@ -35,13 +35,18 @@
 | D-010 | ML用CSVだけはADMINが端末download可能 | 利用者承認 | 直接識別子除外、監査、警告、用途制限 |
 | D-011 | 情報損失なく軽量ならSheetセル内JSONを正本にできる | 利用者承認 | version、chunk、hash、完全復元を必須にする |
 | D-012 | 監査結果とPhase 3詳細計画を基準として採用する | 2026-09-29利用者承認 | task/gate/feedback/rollbackを省略しない |
+| D-013 | 初期認証はメールアドレス＋password、忘れた場合はAUTH_MANAGERがresetする | 2026-09-29利用者承認 | OTP回復は将来追加可能にし、初期版では必須にしない |
+| D-014 | password本文は保存せず、salt付きverifierだけをUsers Sheetへ保存する | 2026-09-29利用者承認 | 平文・可逆暗号・hint列を禁止する |
+| D-015 | password導出はCloudflare Functionの処理中memoryで行い、永続保存・log出力しない | 2026-09-29利用者承認 | 実装前にWeb Crypto性能と通信手順をsecurity testする |
+| D-016 | GAS URLの秘密性へ依存せず、全GAS requestにHMAC、timestamp、nonce、body hashを必須とする | 2026-09-29利用者承認 | 署名不正時はSheetへ触れる前に拒否する |
+| D-017 | session CookieはCloudflareが発行し、session hash・Role・StatusはGAS/Sheetsで管理する | 2026-09-29利用者承認 | GASは毎APIでRole/Statusを再確認する |
 
 ## 3. 推奨案付き未決事項
 
 | ID | 論点 | 推奨案 | 理由 | 必要な承認 |
 |---|---|---|---|---|
-| U-001 | 認証方式 | PASSWORD_WITH_OTP_RECOVERY | 利用者要望を満たし、reset・高risk操作にOTPを残せる | 会社情報管理・業務責任者 |
-| U-002 | password保存 | PBKDF2等のsalt付きverifierのみ。平文・可逆暗号は禁止 | Sheet漏洩時の被害を抑える | 会社情報管理 |
+| U-001 | 認証方式の会社承認 | PASSWORD_WITH_ADMIN_RESET。OTP回復は将来追加 | 利用者承認済み。会社の認証規程との整合だけを残す | 会社情報管理・業務責任者 |
+| U-002 | password処理方式の会社承認 | Cloudflare Web CryptoでPBKDF2等を実測し、salt付きverifierのみ保存 | GASにはpassword KDF向け標準APIがなく、平文保存を避ける | 会社情報管理 |
 | U-003 | AUTH_MANAGER | 独立role。credential管理のみで成績閲覧権限を暗黙付与しない | 職務分離と最小権限 | 業務責任者 |
 | U-004 | ADMINの氏名表示 | 個人詳細と必要な一覧だけ。集計画面は原則識別子なし | 過剰表示を避けつつ指導業務を維持 | 講師・業務責任者 |
 | U-005 | Person照合 | 自動候補＋人によるCONFIRMED。氏名単独で確定しない | 同姓同名・改姓・転校への耐性 | 業務責任者 |
@@ -83,3 +88,10 @@
 - role matrix、data lifecycle、account ownership、incident責任表が揃っている。
 - 未受容のP0 riskがない。
 - G1開始を会社責任者が明示承認している。
+
+## 6. 2026-09-29認証方針承認記録
+
+- 利用者承認: D-013〜D-017
+- 技術判断記録: `ADR-0001-password-auth-and-gas-boundary.md`
+- 残存gate: Cloudflareで資格情報を一時処理すること、外部service利用、運用責任者について会社承認を得る
+- 未承認扱い: 実data接続、Secret投入、GAS/Cloudflare本番deploy

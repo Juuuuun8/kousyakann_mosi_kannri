@@ -109,10 +109,12 @@ JSON化は必須ではない。Phase 1で通常行形式、科目単位JSON、�
 | 応答 | ID不存在、REVOKED、誤パスワード、ロック中を外部から区別できない共通エラーとする |
 | 権限 | ログイン成功後も全APIでUsersのRoleとStatusを再確認し、INPUT登録のみ・ADMIN全データ閲覧を維持する |
 | セッション | HttpOnly、Secure、SameSite=Strictの既存方針を維持する |
-| 回復 | OTP_ONLYとPASSWORD_WITH_OTP_RECOVERYを契約上残し、回復・高リスク操作の追加確認に使用できるようにする |
+| 回復 | 初期版はAUTH_MANAGERによるresetとし、OTP_ONLYとPASSWORD_WITH_OTP_RECOVERYは将来拡張として契約上残す |
 | 保存境界 | ブラウザ・Cloudflare・GASでは処理中メモリだけで扱い、ログ、Web Storage、CacheServiceへパスワードを残さない |
 
-PBKDF2の実装可否だけで安全性は確定しない。本番導入前にGASで処理時間・同時ログイン・ロック競合を測定し、会社の認証方針、退職者失効、初期パスワードの安全な伝達、再設定本人確認を承認する。
+PBKDF2の実装可否だけで安全性は確定しない。本番導入前にCloudflareでKDF処理時間・同時loginを、GASで認証transaction・lock競合を測定し、会社の認証方針、退職者失効、初期passwordの安全な伝達、reset本人確認を承認する。
+
+2026-09-29追記: 利用者承認により、初期版はPASSWORD_WITH_ADMIN_RESETとする。password KDFはGASだけで実行せず、Cloudflare Functionの処理中memoryで行う候補を採用した。work factorとprotocolは実測・security review後に固定し、会社承認までは本番接続しない。詳細は`ADR-0001-password-auth-and-gas-boundary.md`を参照する。
 
 ### 必須テスト
 
