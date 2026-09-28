@@ -82,6 +82,18 @@ export const syntheticDomainResult = {
   warnings: [],
 };
 
+export const syntheticDomainComparisonResult = {
+  resultVersion: "analytics-result.v1",
+  generatedAt: "2026-09-28T00:00:00Z",
+  query: { resultVersion: "analytics-result.v1", actorRole: "ADMIN", filter: { subjectDefinitionIds: ["subject.synthetic.math"] }, comparison: { baseline: { examEventIds: ["exam.synthetic.2026.round-1"] }, comparison: { examEventIds: ["exam.synthetic.2026.round-2"] }, label: "第1回→第2回" }, groupBy: ["domain"], metricIds: ["comparable_person_count", "excluded_rate", "domain_change_from_previous_event"], suppressionThreshold: 5 },
+  groups: [
+    { group: { groupKey: "domain=domain.synthetic.probability", dimensions: { domain: "domain.synthetic.probability" }, subjectDefinitionId: null, sampleCount: 92, excludedCount: 10, missingCounts: [] }, metrics: [scalar("comparable_person_count", 92, "count", 102), scalar("excluded_rate", 10 / 102, "rate", 102), scalar("domain_change_from_previous_event", 5.4, "percentage_point", 92)] },
+    { group: { groupKey: "domain=domain.synthetic.vectors", dimensions: { domain: "domain.synthetic.vectors" }, subjectDefinitionId: null, sampleCount: 94, excludedCount: 7, missingCounts: [] }, metrics: [scalar("comparable_person_count", 94, "count", 101), scalar("excluded_rate", 7 / 101, "rate", 101), scalar("domain_change_from_previous_event", 1.7, "percentage_point", 94)] },
+    { group: { groupKey: "domain=domain.synthetic.calculus", dimensions: { domain: "domain.synthetic.calculus" }, subjectDefinitionId: null, sampleCount: 90, excludedCount: 10, missingCounts: [] }, metrics: [scalar("comparable_person_count", 90, "count", 100), scalar("excluded_rate", .1, "rate", 100), scalar("domain_change_from_previous_event", -2.6, "percentage_point", 90)] },
+  ],
+  warnings: ["baseline and comparison use different schema versions; normalized domainId was required"],
+};
+
 export const syntheticAnswerResult = {
   resultVersion: "analytics-result.v1",
   generatedAt: "2026-09-28T00:00:00Z",

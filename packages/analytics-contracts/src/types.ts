@@ -32,6 +32,7 @@ export interface AnalyticsFilter {
   readonly gradeRaws?: readonly string[];
   readonly subjectDefinitionIds?: readonly SubjectDefinitionId[];
   readonly metricDefinitionIds?: readonly MetricDefinitionId[];
+  readonly domainIds?: readonly string[];
   readonly targetUniversityIds?: readonly string[];
   readonly targetPreferenceOrders?: readonly number[];
   readonly schemaVersionIds?: readonly SchemaVersionId[];

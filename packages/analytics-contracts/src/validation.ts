@@ -74,7 +74,7 @@ function validateFilter(value: unknown, path: string, issues: AnalyticsValidatio
     return;
   }
   rejectUnknownKeys(value, [
-    "examEventIds", "locationIds", "schoolCodes", "gradeRaws", "subjectDefinitionIds", "metricDefinitionIds",
+    "examEventIds", "locationIds", "schoolCodes", "gradeRaws", "subjectDefinitionIds", "metricDefinitionIds", "domainIds",
     "targetUniversityIds", "targetPreferenceOrders", "schemaVersionIds", "missingReasons", "importedAtFrom", "importedAtTo",
   ], path, issues);
   for (const key of [
@@ -82,11 +82,12 @@ function validateFilter(value: unknown, path: string, issues: AnalyticsValidatio
     "locationIds",
     "subjectDefinitionIds",
     "metricDefinitionIds",
+    "domainIds",
     "schemaVersionIds",
     "targetUniversityIds",
   ]) arrayOfIds(value[key], `${path}.${key}`, issues);
   for (const key of ["schoolCodes", "gradeRaws"]) arrayOfStrings(value[key], `${path}.${key}`, issues);
-  for (const key of ["examEventIds", "locationIds", "schoolCodes", "gradeRaws", "subjectDefinitionIds", "metricDefinitionIds", "targetUniversityIds", "targetPreferenceOrders", "schemaVersionIds", "missingReasons"]) rejectDuplicates(value[key], `${path}.${key}`, issues);
+  for (const key of ["examEventIds", "locationIds", "schoolCodes", "gradeRaws", "subjectDefinitionIds", "metricDefinitionIds", "domainIds", "targetUniversityIds", "targetPreferenceOrders", "schemaVersionIds", "missingReasons"]) rejectDuplicates(value[key], `${path}.${key}`, issues);
   if (value.targetPreferenceOrders !== undefined &&
       (!Array.isArray(value.targetPreferenceOrders) ||
        value.targetPreferenceOrders.some((item) => !isInteger(item) || item < 1))) {

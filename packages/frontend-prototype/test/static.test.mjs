@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { validateAnalyticsResult } from "../../analytics-contracts/src/index.ts";
-import { answerCompositionModel, comparisonSummaryModel, domainTableModel, subjectTableModel, targetSummaryModel } from "../src/analytics-view-model.js";
-import { syntheticAnswerResult, syntheticComparisonResult, syntheticDomainResult, syntheticSubjectResult, syntheticTargetResult } from "../src/synthetic-analytics-results.js";
+import { answerCompositionModel, comparisonSummaryModel, domainTableModel, domainTrendModel, subjectTableModel, targetSummaryModel } from "../src/analytics-view-model.js";
+import { syntheticAnswerResult, syntheticComparisonResult, syntheticDomainComparisonResult, syntheticDomainResult, syntheticSubjectResult, syntheticTargetResult } from "../src/synthetic-analytics-results.js";
 
 const root = new URL("../", import.meta.url);
 
 test("every synthetic screen result satisfies the runtime analytics contract", () => {
-  for (const result of [syntheticSubjectResult, syntheticTargetResult, syntheticComparisonResult, syntheticDomainResult, syntheticAnswerResult]) {
+  for (const result of [syntheticSubjectResult, syntheticTargetResult, syntheticComparisonResult, syntheticDomainResult, syntheticDomainComparisonResult, syntheticAnswerResult]) {
     assert.deepEqual(validateAnalyticsResult(result), { ok: true, issues: [] });
   }
 });
@@ -66,6 +66,10 @@ test("analytics result adapters expose evidence and suppression without direct i
   assert.equal(domains[0].label, "確率");
   assert.equal(domains[0].scoreRate, "57.0%");
   assert.equal(domains[0].missingCount, 3);
+  const domainTrends = domainTrendModel(syntheticDomainComparisonResult);
+  assert.equal(domainTrends[0].change, "+5.4pt");
+  assert.equal(domainTrends[0].comparableCount, 92);
+  assert.equal(domainTrends[0].excludedCount, 10);
 
   const answers = answerCompositionModel(syntheticAnswerResult);
   assert.equal(answers.sampleCount, 101);

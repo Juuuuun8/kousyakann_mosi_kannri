@@ -113,6 +113,7 @@ function observations(binding: AnalyticsPayloadBinding, report: ReportRecord): r
 
 function observationMatches(item: Observation, filter: AnalyticsFilter): boolean {
   return reportMatches(item.report, filter) && included(filter.subjectDefinitionIds, item.subjectDefinitionId) &&
+    included(filter.domainIds, item.domainId ?? "") &&
     included(filter.targetUniversityIds, item.targetUniversityId ?? "") &&
     included(filter.targetPreferenceOrders, item.targetRank ?? 0) &&
     (filter.missingReasons === undefined || (item.missingReason !== null && filter.missingReasons.includes(item.missingReason)));

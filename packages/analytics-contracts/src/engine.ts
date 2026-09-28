@@ -232,7 +232,7 @@ export function executeSubjectAnalytics(query: AnalyticsQuery, dataset: Analytic
   const issues: AnalyticsExecutionIssue[] = [];
   if (unsupportedGroupings.length) issues.push({ code: "UNSUPPORTED_GROUPING", message: unsupportedGroupings.join(", ") });
   if (unsupportedMetrics.length) issues.push({ code: "UNSUPPORTED_METRIC", message: unsupportedMetrics.join(", ") });
-  if (query.filter.targetUniversityIds !== undefined || query.filter.targetPreferenceOrders !== undefined) issues.push({ code: "UNSUPPORTED_FILTER", message: "target filters require the target payload analytics engine" });
+  if (query.filter.domainIds !== undefined || query.filter.targetUniversityIds !== undefined || query.filter.targetPreferenceOrders !== undefined) issues.push({ code: "UNSUPPORTED_FILTER", message: "payload filters require a payload analytics engine" });
   if (query.comparison !== undefined) issues.push({ code: "UNSUPPORTED_COMPARISON", message: "comparison execution is not implemented in the subject summary engine" });
   if (issues.length) throw new AnalyticsExecutionError(issues);
 

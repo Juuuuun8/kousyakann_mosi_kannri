@@ -103,6 +103,19 @@ export function domainTableModel(result, labels = {}) {
   });
 }
 
+export function domainTrendModel(result) {
+  return result.groups.map((group) => {
+    const change = metric(group, "domain_change_from_previous_event");
+    return {
+      id: group.group.dimensions.domain ?? "domain.unknown",
+      comparableCount: group.group.sampleCount,
+      excludedCount: group.group.excludedCount,
+      change: display(change, (value) => decimal(value, "pt")),
+      suppressed: Boolean(change?.suppressed),
+    };
+  });
+}
+
 export function answerCompositionModel(result) {
   const group = result.groups[0];
   if (!group) return { sampleCount: 0, parts: [], suppressed: true };
