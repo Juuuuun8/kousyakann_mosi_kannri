@@ -8,7 +8,7 @@
     "recordId", "reportId", "subjectDefinitionId", "metricDefinitionId", "score", "maxScore", "scoreRate",
     "deviation", "abilityLevel", "nationalAverage", "nationalRank", "nationalPopulation", "currentStudentAverage",
     "graduateAverage", "currentRank", "currentPopulation", "schoolDeviation", "schoolAverage", "schoolRank",
-    "schoolPopulation", "missingReason", "sourceLabelRaw", "valueHash", "schemaVersionId", "parserVersion",
+    "schoolPopulation", "missingReason", "sourceLabelRaw", "attentionCodeRaw", "valueHash", "schemaVersionId", "parserVersion",
     "normalizationVersion"
   ],
   "properties": {
@@ -34,6 +34,7 @@
     "schoolPopulation": { "$ref": "#/$defs/numberOrNull" },
     "missingReason": { "type": ["string", "null"], "enum": ["NOT_APPLICABLE", "NOT_TAKEN", "NOT_PRINTED", "BLANK_ON_REPORT", "UNREADABLE", "PARSER_ERROR", "UNKNOWN_CODE", "REDACTED", null] },
     "sourceLabelRaw": { "type": ["string", "null"] },
+    "attentionCodeRaw": { "type": ["string", "null"] },
     "valueHash": { "anyOf": [{ "$ref": "#/$defs/sha256" }, { "type": "null" }] },
     "schemaVersionId": { "$ref": "#/$defs/identifier" },
     "parserVersion": { "type": "string", "minLength": 1 },

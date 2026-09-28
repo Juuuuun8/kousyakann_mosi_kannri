@@ -4,7 +4,7 @@
 
 ## 現在の状態
 
-会社承認前の設計・準備段階です。本番GAS、職場Google Drive、実データには接続しません。Phase 0で開発統制と保存境界を定め、現在はPhase 1として分析要件とGoogle Sheets正本データ契約を設計しています。
+会社承認前の設計・準備段階です。本番GAS、職場Google Drive、実データには接続しません。開発統制、分析要件、Google Sheets正本データ契約に加え、初期対象帳票のブラウザ側Parserを実装しています。
 
 ## 最上位の制約
 
@@ -37,6 +37,7 @@
 - [P2-T02 河合塾分野別成績抽出](docs/tasks/P2-T02-kawai-domain-results.md)
 - [P2-T03 河合塾志望校別成績抽出](docs/tasks/P2-T03-kawai-target-schools.md)
 - [P2-T04 河合塾解答明細抽出](docs/tasks/P2-T04-kawai-answer-marks.md)
+- [P2-T05 河合塾ページ1残項目・READYゲート](docs/tasks/P2-T05-kawai-page1-details-and-ready-gate.md)
 - [P1-T10 分析クエリ契約](docs/tasks/P1-T10-analytics-contracts.md)
 - [P1-T11 ML CSV契約](docs/tasks/P1-T11-export-contracts.md)
 - [P1-T13 PIIスキャン初版](docs/tasks/P1-T13-security-pii-scan.md)

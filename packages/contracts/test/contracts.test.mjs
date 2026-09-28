@@ -65,6 +65,7 @@ const subjectScore = {
   schoolPopulation: 20,
   missingReason: null,
   sourceLabelRaw: "英語",
+  attentionCodeRaw: null,
   valueHash: hash,
   schemaVersionId: report.schemaVersionId,
   parserVersion: report.parserVersion,

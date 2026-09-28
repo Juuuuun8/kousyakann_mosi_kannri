@@ -165,6 +165,7 @@ export function makeSyntheticDataset(options: SyntheticDatasetOptions = {}): Syn
         schoolPopulation: 20,
         missingReason: null,
         sourceLabelRaw: `合成科目${subjectIndex + 1}`,
+        attentionCodeRaw: null,
         valueHash: hash(20000 + reportNumber * 100 + subjectIndex),
         schemaVersionId: version,
         parserVersion: "kawai-parser@0.1.0",

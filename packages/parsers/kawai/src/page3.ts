@@ -239,3 +239,8 @@ export function parseTargetsPayload(page: PdfPageText): TargetsPayload {
   });
   return { v: 1, type: "targets", items };
 }
+
+export function targetSlotCount(page: PdfPageText): number {
+  return toLayoutLines(page.items).flatMap((line) => line.words)
+    .filter((word) => /^第\d+志望$/u.test(normalizeCompact(word.text))).length;
+}

@@ -5,6 +5,7 @@ import { allWords, normalizeCompact, normalizeWidth, numberOrNull, toLayoutLines
 export interface ParsedSubjectScore {
   readonly subjectRaw: string;
   readonly subjectDefinitionId: SubjectDefinitionId | null;
+  readonly attentionCodeRaw: string | null;
   readonly score: number | null;
   readonly maxScore: number | null;
   readonly deviation: number | null;
@@ -58,6 +59,32 @@ const SUBJECT_IDS: Readonly<Record<string, string>> = {
   "総合(国理６－８型)": "subject.overall.6-8",
   "総合(国理6－8型)": "subject.overall.6-8",
   "総合(理系)": "subject.overall.science",
+  "総合": "subject.overall.6-8",
+  "国理6-8型": "subject.overall.6-8",
+  "国理６－８型": "subject.overall.6-8",
+  "数学1科目": "subject.math.private-eval.one",
+  "数学2科目": "subject.math.private-eval.two",
+  "数学(1科目)": "subject.math.private-eval.one",
+  "数学(2科目)": "subject.math.private-eval.two",
+  "現代文型": "subject.japanese.modern.private-eval",
+  "現古型": "subject.japanese.modern-classical.private-eval",
+  "国語型": "subject.japanese.total.private-eval",
+  "国(現)": "subject.japanese.modern.private-eval",
+  "国(現・古)": "subject.japanese.modern-classical.private-eval",
+  "国(現・古・漢)": "subject.japanese.total.private-eval",
+};
+
+const SUBJECT_ALIASES: Readonly<Record<string, string>> = {
+  "英語英語": "英語",
+  "リスニングリスニング": "リスニング",
+  "数学①②数学①②": "数学①②",
+  "国語国語": "国語",
+  "理科化学": "化学",
+  "理科物理": "物理",
+  "情報情報I": "情報I",
+  "情報情報Ⅰ": "情報Ⅰ",
+  "国理6-8": "国理6-8型",
+  "総合国理6-8": "国理6-8型",
 };
 
 const SUBJECT_LINE = /^(.*?)\s*([*＊#])?\s*(\d+|-+)\/(\d+|-+)\s+([\d.]+)\s+([SABCDEF])\s+([\d.]+|-+)\s+(\d+)\/(\d+)\s+([\d.]+|-+)\s+([\d.]+|-+)\s+(\d+)\/(\d+)\s+([\d.]+)\s+([\d.]+|-+)\s+(\d+)\/(\d+)$/u;
@@ -65,10 +92,21 @@ const DROP_LABELS = new Set(["理科", "地歴", "公民", "第1", "第2"]);
 
 function cleanSubjectLabel(label: string): string {
   let parts = label.split(/[\s\u3000]+/u).filter(Boolean);
-  if (parts[0]?.startsWith("総合")) return `総合(${parts.slice(1).join("")})`;
+  if (parts[0]?.startsWith("総合")) return parts.length === 1 ? normalizeCompact(parts[0]) : `総合(${parts.slice(1).join("")})`;
   parts = parts.filter((part) => !DROP_LABELS.has(part));
   if (parts.length > 1 && ["数学①", "数学②", "情報", "英語", "国語"].includes(parts[0])) parts = parts.slice(1);
   return normalizeCompact(parts.join(""));
+}
+
+export function normalizeSubjectLabel(label: string): string {
+  const compact = normalizeCompact(label).replace(/[－–—]/gu, "-");
+  const aliased = SUBJECT_ALIASES[compact] ?? compact;
+  if (/^総合\(.+\)$/u.test(aliased)) return aliased;
+  return cleanSubjectLabel(aliased);
+}
+
+export function subjectDefinitionIdFor(label: string): SubjectDefinitionId | null {
+  return (SUBJECT_IDS[normalizeSubjectLabel(label)] ?? null) as SubjectDefinitionId | null;
 }
 
 function nullableInteger(value: string): number | null {
@@ -121,7 +159,8 @@ export function parseSubjectScores(page: PdfPageText): readonly ParsedSubjectSco
     const missingReason: MissingReason | null = numberOrNull(match[3]) === null ? "NOT_TAKEN" : null;
     scores.push({
       subjectRaw,
-      subjectDefinitionId: (SUBJECT_IDS[subjectRaw] ?? null) as SubjectDefinitionId | null,
+      subjectDefinitionId: subjectDefinitionIdFor(subjectRaw),
+      attentionCodeRaw: match[2] ?? null,
       score: numberOrNull(match[3]), maxScore: numberOrNull(match[4]), deviation: numberOrNull(match[5]), abilityLevel: match[6] ?? null,
       nationalAverage: numberOrNull(match[7]), nationalRank: nullableInteger(match[8]), nationalPopulation: nullableInteger(match[9]),
       currentStudentAverage: numberOrNull(match[10]), graduateAverage: numberOrNull(match[11]), currentRank: nullableInteger(match[12]), currentPopulation: nullableInteger(match[13]),

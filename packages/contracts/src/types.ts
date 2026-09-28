@@ -83,6 +83,7 @@ export interface SubjectScoreRecord {
   schoolPopulation: NullableNumber;
   missingReason: MissingReason | null;
   sourceLabelRaw: string | null;
+  attentionCodeRaw: string | null;
   valueHash: Sha256Hex | null;
   schemaVersionId: SchemaVersionId;
   parserVersion: string;

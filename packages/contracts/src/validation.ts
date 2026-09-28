@@ -235,6 +235,7 @@ export function validateSubjectScoreRecord(value: unknown): ValidationResult {
     issues.push(issue("$.missingReason", "ENUM", "unknown missing reason"));
   }
   nullableTextField(value, "sourceLabelRaw", path, issues);
+  nullableTextField(value, "attentionCodeRaw", path, issues);
   hashField(value, "valueHash", path, issues, true);
   identifierField(value, "schemaVersionId", path, issues);
   requiredString(value, "parserVersion", path, issues);
@@ -312,6 +313,24 @@ function validatePayloadJsonInternal(value: unknown, path: string, issues: Valid
     return;
   }
 
+  if (value.type === "trend") {
+    const keys = ["examEventIdRaw", "examEventId", "subjectRaw", "subjectDefinitionId", "score", "deviation", "abilityLevel", "missingReason"];
+    value.items.forEach((item, index) => {
+      const itemPath = `${path}.items[${index}]`;
+      if (!isRecord(item)) {
+        issues.push(issue(itemPath, "OBJECT", "trend item must be an object"));
+        return;
+      }
+      if (JSON.stringify(Object.keys(item).sort()) !== JSON.stringify([...keys].sort())) issues.push(issue(itemPath, "COLUMN_SET", "trend item contains missing or unknown fields"));
+      for (const key of ["examEventIdRaw", "subjectRaw"]) if (!isString(item[key]) || item[key].length === 0) issues.push(issue(`${itemPath}.${key}`, "REQUIRED_STRING", `${key} is required`));
+      for (const key of ["examEventId", "subjectDefinitionId"]) if (!isNullableString(item[key])) issues.push(issue(`${itemPath}.${key}`, "STRING_OR_NULL", `${key} must be a string or null`));
+      for (const key of ["score", "deviation"]) if (!isNullableNumber(item[key])) issues.push(issue(`${itemPath}.${key}`, "NUMBER_OR_NULL", `${key} must be a finite number or null`));
+      if (item.abilityLevel !== null && !isOneOf(ABILITY_LEVELS, item.abilityLevel)) issues.push(issue(`${itemPath}.abilityLevel`, "ENUM", "unknown ability level"));
+      if (!isNullableMissingReason(item.missingReason)) issues.push(issue(`${itemPath}.missingReason`, "ENUM", "unknown missing reason"));
+    });
+    return;
+  }
+
   if (value.type === "targets") {
     const targetKeys = ["preferenceOrder", "scheduleRaw", "universityRaw", "facultyRaw", "departmentMethodRaw", "universityId", "judgementRaw", "scoreMetricRaw", "scoreOrDeviation", "fullScore", "borderScore", "firstChoiceRank", "firstChoicePopulation", "totalRank", "totalPopulation", "firstChoiceAverage", "totalAverage", "capacity", "subjectResults", "evaluationBands", "missingReason"];
     const subjectKeys = ["subjectRaw", "subjectDefinitionId", "averageDeviation", "personalScore", "universityAllocation", "missingReason"];
@@ -357,7 +376,7 @@ function validatePayloadJsonInternal(value: unknown, path: string, issues: Valid
     return;
   }
 
-  if (!["trend", "targets", "narrative", "raw_labels"].includes(value.type)) {
+  if (!["targets", "narrative", "raw_labels"].includes(value.type)) {
     issues.push(issue(`${path}.type`, "ENUM", "unknown payload type"));
   }
 }
