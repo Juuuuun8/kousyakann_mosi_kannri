@@ -66,6 +66,8 @@ npm run verify
 - [P2-T12 認証・通信・監査契約](docs/tasks/P2-T12-auth-transport-audit-contracts.md)
 - [P2-T13 PDF登録・ML出力安全UI](docs/tasks/P2-T13-input-and-export-safety-ui.md)
 - [Phase 3 承認後結合・運用計画](docs/plans/phase-3-integration-and-operations.md)
+- [仕様・実装 客観監査報告書 2026-09-29](docs/reviews/spec-implementation-audit-2026-09-29.md)
+- [Phase 3 本番結合・受入・運用 詳細実装計画 v2](docs/plans/phase-3-production-implementation-plan-v2.md)
 - [承認前完了レビュー 2026-09-29](docs/reviews/preapproval-completion-review-2026-09-29.md)
 - [会社デモ構成・制約・説明ポイント 2026-09-29](docs/reviews/company-demo-2026-09-29.md)
 - [Phase 1 初期決定記録（レビュー待ち）](docs/decisions/phase-1-initial-decisions.md)
