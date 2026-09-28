@@ -96,10 +96,39 @@ const payload = {
   createdAt: report.importedAt,
 };
 
+const targetsPayload = {
+  v: 1,
+  type: "targets",
+  items: [{
+    preferenceOrder: 1,
+    scheduleRaw: "前期",
+    universityRaw: "合成大学",
+    facultyRaw: "合成学部",
+    departmentMethodRaw: "合成方式",
+    universityId: null,
+    judgementRaw: "A",
+    scoreMetricRaw: "偏差値",
+    scoreOrDeviation: 55,
+    fullScore: 1000,
+    borderScore: 60,
+    firstChoiceRank: 1,
+    firstChoicePopulation: 10,
+    totalRank: 2,
+    totalPopulation: 20,
+    firstChoiceAverage: 50,
+    totalAverage: 51,
+    capacity: 20,
+    subjectResults: [{ subjectRaw: "英語", subjectDefinitionId: "subject.english.reading", averageDeviation: 54, personalScore: 80, universityAllocation: 100, missingReason: null }],
+    evaluationBands: [{ thresholdRaw: "A70〜", judgementRaw: "A", lowerBound: 70, population: 3, missingReason: null }],
+    missingReason: null,
+  }],
+};
+
 test("representative canonical records are valid", () => {
   assert.equal(validateReportRecord(report).ok, true);
   assert.equal(validateSubjectScoreRecord(subjectScore).ok, true);
   assert.equal(validatePayloadJson(payloadJson).ok, true);
+  assert.equal(validatePayloadJson(targetsPayload).ok, true);
   assert.equal(validatePayloadRecord(payload).ok, true);
 });
 
@@ -118,6 +147,7 @@ test("invalid enums, chunks, and payload tuples fail closed", () => {
   };
   assert.equal(validatePayloadJson(incompleteDomain).ok, false);
   assert.equal(validatePayloadJson({ ...incompleteDomain, commentaryRaw: 1 }).ok, false);
+  assert.equal(validatePayloadJson({ ...targetsPayload, items: [{ ...targetsPayload.items[0], subjectResults: undefined }] }).ok, false);
 });
 
 test("payload text has a hard provisional cell guard", () => {

@@ -20,6 +20,7 @@ import {
 import { normalizeCompact, pageByOrdinal, pageOrdinal } from "./layout.ts";
 import { headerField, pageOneHasRequiredAnchors, parseHeader, parseSubjectScores } from "./page1.ts";
 import { domainItemCount, parseDomainPayloads } from "./page2.ts";
+import { parseTargetsPayload } from "./page3.ts";
 
 export const KAWAI_SCHEMA_VERSION_ID = "kawai.ct.2026.round-2.v1" as SchemaVersionId;
 export const KAWAI_EXAM_EVENT_ID = "kawai.ct.2026.round-2" as ExamEventId;
@@ -123,6 +124,9 @@ export function extractKawai(input: PdfTextDocument, detection: DetectResult): E
   const secondPage = pages[1];
   const domainPayloads = secondPage ? parseDomainPayloads(secondPage) : [];
   fields.push({ key: "domain_item_count", rawValue: String(domainItemCount(domainPayloads)), pageNumber: secondPage?.pageNumber ?? null, sourceLabel: "分野別成績件数" });
+  const thirdPage = pages[2];
+  const targetsPayload = thirdPage ? parseTargetsPayload(thirdPage) : { v: 1 as const, type: "targets" as const, items: [] };
+  fields.push({ key: "target_count", rawValue: String(targetsPayload.items.length), pageNumber: thirdPage?.pageNumber ?? null, sourceLabel: "志望校件数" });
   const payload: RawLabelsPayload = {
     v: 1,
     type: "raw_labels",
@@ -132,9 +136,9 @@ export function extractKawai(input: PdfTextDocument, detection: DetectResult): E
     status: "EXTRACTED",
     schemaVersionId: KAWAI_SCHEMA_VERSION_ID,
     fields,
-    payloads: [payload, ...domainPayloads],
+    payloads: [payload, ...domainPayloads, targetsPayload],
     evidence: detection.evidence,
-    issues: [issue("KAWAI_PARTIAL_EXTRACTION", "WARNING", "page 1 trend/conversion, page 3 target, and page 4 answer details remain transitional raw payloads")],
+    issues: [issue("KAWAI_PARTIAL_EXTRACTION", "WARNING", "page 1 trend/conversion and page 4 answer details remain transitional raw payloads")],
   };
 }
 
@@ -151,6 +155,8 @@ export function validateKawai(input: PdfTextDocument, extraction: ExtractResult)
   if (scores.some((score) => score.subjectDefinitionId === null)) issues.push(issue("KAWAI_UNKNOWN_SUBJECT", "WARNING", "one or more subject labels are not in the normalization map", firstPage?.pageNumber ?? null, "subject_scores"));
   const domainPayloads = extraction.payloads.filter((payload) => payload.type === "domain_results");
   if (domainItemCount(domainPayloads) === 0) issues.push(issue("KAWAI_DOMAIN_RESULTS_MISSING", "FATAL", "no page 2 domain rows were extracted", pageByOrdinal(input, 2)?.pageNumber ?? null, "domain_results"));
+  const targets = extraction.payloads.find((payload) => payload.type === "targets");
+  if (!targets || targets.items.length === 0) issues.push(issue("KAWAI_TARGETS_MISSING", "FATAL", "no page 3 target schools were extracted", pageByOrdinal(input, 3)?.pageNumber ?? null, "targets"));
   if (!extraction.payloads.some((payload) => payload.type === "raw_labels")) issues.push(issue("KAWAI_PAYLOAD_COUNT", "FATAL", "transitional raw label payload is missing"));
   if (issues.some((item) => item.severity === "FATAL")) return { status: "INVALID", issues };
   return issues.some((item) => item.severity === "WARNING" || item.severity === "ERROR") ? { status: "REVIEW", issues } : { status: "VALID", issues };
@@ -165,7 +171,7 @@ export function normalizeKawai(
   const fields = extraction.fields.map((field) => ({
     key: field.key,
     rawValue: field.rawValue,
-    normalizedValue: ["page_count", "subject_score_count", "domain_item_count"].includes(field.key) && field.rawValue !== null ? Number(field.rawValue) : field.rawValue,
+    normalizedValue: ["page_count", "subject_score_count", "domain_item_count", "target_count"].includes(field.key) && field.rawValue !== null ? Number(field.rawValue) : field.rawValue,
     pageNumber: field.pageNumber,
     missingReason: field.rawValue === null ? "UNREADABLE" : null,
   }));

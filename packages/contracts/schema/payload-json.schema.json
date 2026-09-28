@@ -116,7 +116,7 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["preferenceOrder", "scheduleRaw", "universityRaw", "facultyRaw", "departmentMethodRaw", "universityId", "judgementRaw", "scoreOrDeviation", "fullScore", "borderScore", "firstChoiceRank", "firstChoicePopulation", "totalRank", "totalPopulation", "capacity", "missingReason"],
+            "required": ["preferenceOrder", "scheduleRaw", "universityRaw", "facultyRaw", "departmentMethodRaw", "universityId", "judgementRaw", "scoreMetricRaw", "scoreOrDeviation", "fullScore", "borderScore", "firstChoiceRank", "firstChoicePopulation", "totalRank", "totalPopulation", "firstChoiceAverage", "totalAverage", "capacity", "subjectResults", "evaluationBands", "missingReason"],
             "properties": {
               "preferenceOrder": { "type": "integer", "minimum": 1 },
               "scheduleRaw": { "$ref": "#/$defs/nullableString" },
@@ -125,6 +125,7 @@
               "departmentMethodRaw": { "$ref": "#/$defs/nullableString" },
               "universityId": { "$ref": "#/$defs/nullableString" },
               "judgementRaw": { "$ref": "#/$defs/nullableString" },
+              "scoreMetricRaw": { "$ref": "#/$defs/nullableString" },
               "scoreOrDeviation": { "$ref": "#/$defs/nullableNumber" },
               "fullScore": { "$ref": "#/$defs/nullableNumber" },
               "borderScore": { "$ref": "#/$defs/nullableNumber" },
@@ -132,7 +133,40 @@
               "firstChoicePopulation": { "$ref": "#/$defs/nullableNumber" },
               "totalRank": { "$ref": "#/$defs/nullableNumber" },
               "totalPopulation": { "$ref": "#/$defs/nullableNumber" },
+              "firstChoiceAverage": { "$ref": "#/$defs/nullableNumber" },
+              "totalAverage": { "$ref": "#/$defs/nullableNumber" },
               "capacity": { "$ref": "#/$defs/nullableNumber" },
+              "subjectResults": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["subjectRaw", "subjectDefinitionId", "averageDeviation", "personalScore", "universityAllocation", "missingReason"],
+                  "properties": {
+                    "subjectRaw": { "type": "string", "minLength": 1 },
+                    "subjectDefinitionId": { "$ref": "#/$defs/nullableString" },
+                    "averageDeviation": { "$ref": "#/$defs/nullableNumber" },
+                    "personalScore": { "$ref": "#/$defs/nullableNumber" },
+                    "universityAllocation": { "$ref": "#/$defs/nullableNumber" },
+                    "missingReason": { "$ref": "#/$defs/missingReason" }
+                  }
+                }
+              },
+              "evaluationBands": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["thresholdRaw", "judgementRaw", "lowerBound", "population", "missingReason"],
+                  "properties": {
+                    "thresholdRaw": { "type": "string", "minLength": 1 },
+                    "judgementRaw": { "$ref": "#/$defs/nullableString" },
+                    "lowerBound": { "$ref": "#/$defs/nullableNumber" },
+                    "population": { "$ref": "#/$defs/nullableNumber" },
+                    "missingReason": { "$ref": "#/$defs/missingReason" }
+                  }
+                }
+              },
               "missingReason": { "$ref": "#/$defs/missingReason" }
             }
           }

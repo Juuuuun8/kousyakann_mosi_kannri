@@ -312,6 +312,51 @@ function validatePayloadJsonInternal(value: unknown, path: string, issues: Valid
     return;
   }
 
+  if (value.type === "targets") {
+    const targetKeys = ["preferenceOrder", "scheduleRaw", "universityRaw", "facultyRaw", "departmentMethodRaw", "universityId", "judgementRaw", "scoreMetricRaw", "scoreOrDeviation", "fullScore", "borderScore", "firstChoiceRank", "firstChoicePopulation", "totalRank", "totalPopulation", "firstChoiceAverage", "totalAverage", "capacity", "subjectResults", "evaluationBands", "missingReason"];
+    const subjectKeys = ["subjectRaw", "subjectDefinitionId", "averageDeviation", "personalScore", "universityAllocation", "missingReason"];
+    const bandKeys = ["thresholdRaw", "judgementRaw", "lowerBound", "population", "missingReason"];
+    value.items.forEach((item, index) => {
+      const itemPath = `${path}.items[${index}]`;
+      if (!isRecord(item)) {
+        issues.push(issue(itemPath, "OBJECT", "target item must be an object"));
+        return;
+      }
+      if (JSON.stringify(Object.keys(item).sort()) !== JSON.stringify([...targetKeys].sort())) issues.push(issue(itemPath, "COLUMN_SET", "target item contains missing or unknown fields"));
+      if (typeof item.preferenceOrder !== "number" || !Number.isInteger(item.preferenceOrder) || item.preferenceOrder < 1) issues.push(issue(`${itemPath}.preferenceOrder`, "POSITIVE_INTEGER", "preference order must be a positive integer"));
+      for (const key of ["scheduleRaw", "universityRaw", "facultyRaw", "departmentMethodRaw", "universityId", "judgementRaw", "scoreMetricRaw"]) if (!isNullableString(item[key])) issues.push(issue(`${itemPath}.${key}`, "STRING_OR_NULL", `${key} must be a string or null`));
+      for (const key of ["scoreOrDeviation", "fullScore", "borderScore", "firstChoiceRank", "firstChoicePopulation", "totalRank", "totalPopulation", "firstChoiceAverage", "totalAverage", "capacity"]) if (!isNullableNumber(item[key])) issues.push(issue(`${itemPath}.${key}`, "NUMBER_OR_NULL", `${key} must be a finite number or null`));
+      if (!isNullableMissingReason(item.missingReason)) issues.push(issue(`${itemPath}.missingReason`, "ENUM", "unknown missing reason"));
+      if (!Array.isArray(item.subjectResults)) issues.push(issue(`${itemPath}.subjectResults`, "ARRAY", "subject results must be an array"));
+      else item.subjectResults.forEach((subject, subjectIndex) => {
+        const subjectPath = `${itemPath}.subjectResults[${subjectIndex}]`;
+        if (!isRecord(subject)) {
+          issues.push(issue(subjectPath, "OBJECT", "target subject result must be an object"));
+          return;
+        }
+        if (JSON.stringify(Object.keys(subject).sort()) !== JSON.stringify([...subjectKeys].sort())) issues.push(issue(subjectPath, "COLUMN_SET", "target subject result contains missing or unknown fields"));
+        if (!isString(subject.subjectRaw) || subject.subjectRaw.length === 0) issues.push(issue(`${subjectPath}.subjectRaw`, "REQUIRED_STRING", "subjectRaw is required"));
+        if (!isNullableString(subject.subjectDefinitionId)) issues.push(issue(`${subjectPath}.subjectDefinitionId`, "STRING_OR_NULL", "subjectDefinitionId must be a string or null"));
+        for (const key of ["averageDeviation", "personalScore", "universityAllocation"]) if (!isNullableNumber(subject[key])) issues.push(issue(`${subjectPath}.${key}`, "NUMBER_OR_NULL", `${key} must be a finite number or null`));
+        if (!isNullableMissingReason(subject.missingReason)) issues.push(issue(`${subjectPath}.missingReason`, "ENUM", "unknown missing reason"));
+      });
+      if (!Array.isArray(item.evaluationBands)) issues.push(issue(`${itemPath}.evaluationBands`, "ARRAY", "evaluation bands must be an array"));
+      else item.evaluationBands.forEach((band, bandIndex) => {
+        const bandPath = `${itemPath}.evaluationBands[${bandIndex}]`;
+        if (!isRecord(band)) {
+          issues.push(issue(bandPath, "OBJECT", "target evaluation band must be an object"));
+          return;
+        }
+        if (JSON.stringify(Object.keys(band).sort()) !== JSON.stringify([...bandKeys].sort())) issues.push(issue(bandPath, "COLUMN_SET", "target evaluation band contains missing or unknown fields"));
+        if (!isString(band.thresholdRaw) || band.thresholdRaw.length === 0) issues.push(issue(`${bandPath}.thresholdRaw`, "REQUIRED_STRING", "thresholdRaw is required"));
+        if (!isNullableString(band.judgementRaw)) issues.push(issue(`${bandPath}.judgementRaw`, "STRING_OR_NULL", "judgementRaw must be a string or null"));
+        for (const key of ["lowerBound", "population"]) if (!isNullableNumber(band[key])) issues.push(issue(`${bandPath}.${key}`, "NUMBER_OR_NULL", `${key} must be a finite number or null`));
+        if (!isNullableMissingReason(band.missingReason)) issues.push(issue(`${bandPath}.missingReason`, "ENUM", "unknown missing reason"));
+      });
+    });
+    return;
+  }
+
   if (!["trend", "targets", "narrative", "raw_labels"].includes(value.type)) {
     issues.push(issue(`${path}.type`, "ENUM", "unknown payload type"));
   }

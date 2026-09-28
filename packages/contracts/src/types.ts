@@ -171,6 +171,7 @@ export interface TargetSchoolItem {
   readonly departmentMethodRaw: string | null;
   readonly universityId: string | null;
   readonly judgementRaw: string | null;
+  readonly scoreMetricRaw: string | null;
   readonly scoreOrDeviation: NullableNumber;
   readonly fullScore: NullableNumber;
   readonly borderScore: NullableNumber;
@@ -178,7 +179,28 @@ export interface TargetSchoolItem {
   readonly firstChoicePopulation: NullableNumber;
   readonly totalRank: NullableNumber;
   readonly totalPopulation: NullableNumber;
+  readonly firstChoiceAverage: NullableNumber;
+  readonly totalAverage: NullableNumber;
   readonly capacity: NullableNumber;
+  readonly subjectResults: readonly TargetSubjectResult[];
+  readonly evaluationBands: readonly TargetEvaluationBand[];
+  readonly missingReason: MissingReason | null;
+}
+
+export interface TargetSubjectResult {
+  readonly subjectRaw: string;
+  readonly subjectDefinitionId: SubjectDefinitionId | null;
+  readonly averageDeviation: NullableNumber;
+  readonly personalScore: NullableNumber;
+  readonly universityAllocation: NullableNumber;
+  readonly missingReason: MissingReason | null;
+}
+
+export interface TargetEvaluationBand {
+  readonly thresholdRaw: string;
+  readonly judgementRaw: string | null;
+  readonly lowerBound: NullableNumber;
+  readonly population: NullableNumber;
   readonly missingReason: MissingReason | null;
 }
 
