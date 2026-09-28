@@ -108,8 +108,9 @@ test("ML builder exports only ACTIVE confirmed identities with deterministic pse
 
 test("ML builder enforces ADMIN hierarchy, filters, and pseudonym key strength", async () => {
   const dataset = makeSyntheticDataset({ reportCount: 1, subjectsPerReport: 2 });
-  const base = { actorRole: "AUTH_MANAGER", actorId: "actor.synthetic", auditId: "audit.synthetic.2", purpose: "合成ML検証", requestedAt: "2026-09-29T00:00:00Z", filter: { subjectDefinitionIds: [dataset.subjectScores[0].subjectDefinitionId] }, dataset, pseudonymKey: new Uint8Array(32) };
+  const base = { actorRole: "ADMIN", actorId: "actor.synthetic", auditId: "audit.synthetic.2", purpose: "合成ML検証", requestedAt: "2026-09-29T00:00:00Z", filter: { subjectDefinitionIds: [dataset.subjectScores[0].subjectDefinitionId] }, dataset, pseudonymKey: new Uint8Array(32) };
   const built = await buildMlExport(base);
   assert.equal(built.request.rows.length, 1);
+  await assert.rejects(() => buildMlExport({ ...base, actorRole: "AUTH_MANAGER" }), /ROLE/u);
   await assert.rejects(() => buildMlExport({ ...base, pseudonymKey: new Uint8Array(8) }), /at least 32/u);
 });

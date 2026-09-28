@@ -1,0 +1,6 @@
+# Copy to .dev.vars for local Pages Functions testing.
+# Never commit real values.
+GAS_ENDPOINT=https://script.google.com/macros/s/LOCAL_PLACEHOLDER/exec
+GAS_HMAC_SECRET=replace-with-at-least-32-random-bytes
+PASSWORD_PEPPER=replace-with-an-independent-random-secret
+ENVIRONMENT=local

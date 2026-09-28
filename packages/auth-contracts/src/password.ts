@@ -21,12 +21,13 @@ export function generatePasswordSalt(): string {
   return toBase64Url(salt);
 }
 
-export async function derivePasswordVerifier(password: string, saltBase64Url: string): Promise<string> {
+export async function derivePasswordVerifier(password: string, saltBase64Url: string, iterations: number = PASSWORD_POLICY.pbkdf2Iterations, pepper = ""): Promise<string> {
   const validation = validatePasswordValue(password);
   if (!validation.ok) throw new Error(validation.issues[0]?.message ?? "password is invalid");
+  if (!Number.isInteger(iterations) || iterations < 100_000 || iterations > 2_000_000) throw new Error("password iterations are outside the supported range");
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
-    new TextEncoder().encode(password),
+    new TextEncoder().encode(`${password}\u0000${pepper}`),
     "PBKDF2",
     false,
     ["deriveBits"],
@@ -36,7 +37,7 @@ export async function derivePasswordVerifier(password: string, saltBase64Url: st
       name: "PBKDF2",
       hash: "SHA-256",
       salt: fromBase64Url(saltBase64Url),
-      iterations: PASSWORD_POLICY.pbkdf2Iterations,
+      iterations,
     },
     keyMaterial,
     PASSWORD_POLICY.verifierBytes * 8,

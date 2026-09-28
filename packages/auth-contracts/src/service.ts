@@ -43,8 +43,8 @@ export async function evaluatePasswordLogin(request: PasswordLoginRequest, user:
 }
 
 const ACTION_ROLES: Readonly<Record<AuthorizedAction, readonly UserAccessRecord["role"][]>> = {
-  CREATE_REPORT: ["INPUT", "ADMIN", "AUTH_MANAGER"], READ_REPORTS: ["ADMIN", "AUTH_MANAGER"], ANALYZE: ["ADMIN", "AUTH_MANAGER"],
-  EXPORT_ML: ["ADMIN", "AUTH_MANAGER"], RESET_CREDENTIAL: ["AUTH_MANAGER"], CHANGE_PASSWORD: ["INPUT", "ADMIN", "AUTH_MANAGER"], LOGOUT: ["INPUT", "ADMIN", "AUTH_MANAGER"],
+  CREATE_REPORT: ["INPUT", "ADMIN"], READ_REPORTS: ["ADMIN"], ANALYZE: ["ADMIN"],
+  EXPORT_ML: ["ADMIN"], RESET_CREDENTIAL: ["AUTH_MANAGER"], CHANGE_PASSWORD: ["INPUT", "ADMIN", "AUTH_MANAGER"], LOGOUT: ["INPUT", "ADMIN", "AUTH_MANAGER"],
 };
 
 export function authorizeAction(user: UserAccessRecord, action: AuthorizedAction): boolean {

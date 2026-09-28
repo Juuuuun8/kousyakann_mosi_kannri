@@ -124,6 +124,8 @@ test("role authorization preserves INPUT register-only and initial-change gates"
   assert.equal(authorizeAction(inputUser, "READ_REPORTS"), false);
   assert.equal(authorizeAction(user({ role: "ADMIN", mustChangePassword: false }), "EXPORT_ML"), true);
   assert.equal(authorizeAction(user({ role: "AUTH_MANAGER", mustChangePassword: false }), "RESET_CREDENTIAL"), true);
+  assert.equal(authorizeAction(user({ role: "AUTH_MANAGER", mustChangePassword: false }), "READ_REPORTS"), false);
+  assert.equal(authorizeAction(user({ role: "AUTH_MANAGER", mustChangePassword: false }), "EXPORT_ML"), false);
   assert.equal(authorizeAction(user({ role: "ADMIN", status: "REVOKED", mustChangePassword: false }), "ANALYZE"), false);
   assert.equal(authorizeAction(user({ role: "ADMIN", mustChangePassword: true }), "ANALYZE"), false);
   assert.equal(authorizeAction(user({ role: "ADMIN", mustChangePassword: true }), "CHANGE_PASSWORD"), true);
