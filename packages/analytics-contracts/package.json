@@ -1,9 +1,9 @@
 {
   "name": "@kousyakann-mosi-kannri/analytics-contracts",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
-    "test": "node --experimental-strip-types --test test/analytics.test.mjs"
+    "test": "node --experimental-strip-types --test"
   }
 }

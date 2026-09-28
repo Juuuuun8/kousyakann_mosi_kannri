@@ -2,6 +2,7 @@ import type {
   ExamEventId,
   IsoDateTime,
   LocationId,
+  MetricDefinitionId,
   MissingReason,
   SchemaVersionId,
   SubjectDefinitionId,
@@ -30,6 +31,7 @@ export interface AnalyticsFilter {
   readonly schoolCodes?: readonly string[];
   readonly gradeRaws?: readonly string[];
   readonly subjectDefinitionIds?: readonly SubjectDefinitionId[];
+  readonly metricDefinitionIds?: readonly MetricDefinitionId[];
   readonly targetUniversityIds?: readonly string[];
   readonly targetPreferenceOrders?: readonly number[];
   readonly schemaVersionIds?: readonly SchemaVersionId[];

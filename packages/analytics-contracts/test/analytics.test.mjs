@@ -23,6 +23,7 @@ test("analytics query contract fixes admin, filters, metrics, and suppression", 
   assert.equal(validateAnalyticsQuery({ ...validQuery, actorRole: "INPUT" }).ok, false);
   assert.equal(validateAnalyticsQuery({ ...validQuery, metricIds: ["not-a-metric"] }).ok, false);
   assert.equal(validateAnalyticsQuery({ ...validQuery, filter: { importedAtFrom: "2026-10-01T00:00:00Z", importedAtTo: "2026-09-01T00:00:00Z" } }).ok, false);
+  assert.equal(validateAnalyticsQuery({ ...validQuery, filter: { metricDefinitionIds: ["metric.subject.summary"] }, groupBy: ["metric_definition"] }).ok, true);
 });
 
 test("analytics result contract requires suppression metadata", () => {

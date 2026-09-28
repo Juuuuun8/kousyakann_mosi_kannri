@@ -68,6 +68,7 @@ function validateFilter(value: unknown, path: string, issues: AnalyticsValidatio
     "examEventIds",
     "locationIds",
     "subjectDefinitionIds",
+    "metricDefinitionIds",
     "schemaVersionIds",
     "targetUniversityIds",
   ]) arrayOfIds(value[key], `${path}.${key}`, issues);
