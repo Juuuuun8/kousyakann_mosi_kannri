@@ -40,6 +40,7 @@
 - [P2-T05 河合塾ページ1残項目・READYゲート](docs/tasks/P2-T05-kawai-page1-details-and-ready-gate.md)
 - [P1-T10 分析クエリ契約](docs/tasks/P1-T10-analytics-contracts.md)
 - [P2-T06 P0科目分析集計エンジン](docs/tasks/P2-T06-subject-analytics-engine.md)
+- [P2-T07 Payload分析集計とUI接続](docs/tasks/P2-T07-payload-analytics-and-ui-binding.md)
 - [P1-T11 ML CSV契約](docs/tasks/P1-T11-export-contracts.md)
 - [P1-T13 PIIスキャン初版](docs/tasks/P1-T13-security-pii-scan.md)
 - [P1-T12 合成UIワイヤーフレーム](docs/tasks/P1-T12-frontend-prototype.md)
