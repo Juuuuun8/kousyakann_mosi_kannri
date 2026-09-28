@@ -48,7 +48,14 @@ function syntheticKawaiDocument(order = [3, 1, 4, 2], candidate = "12345678") {
       item("英語", 35, 215), item("55.0", 55, 215), item("80", 77, 215), item("100", 92, 215), item("A70～", 110, 215), item("3", 132, 215),
       item("未満", 110, 225), item("7", 132, 225),
     ] : [];
-    const items = [item(title, 20, 20), ...headerItems(candidate), ...sectionItems, ...scoreItems, ...domainItems, ...targetItems];
+    const answerItems = ordinal === 4 ? [
+      item("リーディング", 50, 100),
+      item("大問番号", 100, 90), item("1", 150, 90),
+      item("解答番号", 100, 98), item("1", 150, 98), item("2", 165, 98),
+      item("正", 100, 106), item("誤", 108, 106), item("○", 150, 106), item("N", 165, 106),
+      item("マーク", 100, 114), item("1", 150, 114), item("2", 165, 114),
+    ] : [];
+    const items = [item(title, 20, 20), ...headerItems(candidate), ...sectionItems, ...scoreItems, ...domainItems, ...targetItems, ...answerItems];
     pages[ordinal] = { pageNumber: ordinal, text: [title, ...sections[ordinal], ...items.map((entry) => entry.text)].join(" "), items };
   }
   return { pageCount: 4, pages: order.map((ordinal) => pages[ordinal]) };
@@ -56,10 +63,10 @@ function syntheticKawaiDocument(order = [3, 1, 4, 2], candidate = "12345678") {
 
 test("four logical pages are detected independent of physical array order", () => {
   const input = syntheticKawaiDocument();
-  const result = runParserPipeline(input, createKawaiSchema(), { parserVersion: "kawai-parser@0.4.0", normalizationVersion: "normalization@0.1.0" });
+  const result = runParserPipeline(input, createKawaiSchema(), { parserVersion: "kawai-parser@0.5.0", normalizationVersion: "normalization@0.1.0" });
   assert.equal(result.status, "REVIEW");
   assert.equal(result.detection.schemaVersionId, KAWAI_SCHEMA_VERSION_ID);
-  assert.equal(result.extraction?.payloads.length, 3);
+  assert.equal(result.extraction?.payloads.length, 4);
   assert.equal(validatePayloadJson(result.normalization?.payloads[0]).ok, true);
   assert.deepEqual(result.normalization?.payloads[0].items.map((entry) => entry.page), [1, 2, 3, 4]);
   assert.equal(result.normalization?.report?.examCandidateId, "12345678");
@@ -82,6 +89,11 @@ test("four logical pages are detected independent of physical array order", () =
   assert.equal(targets?.items[0].firstChoicePopulation, 10);
   assert.equal(targets?.items[0].subjectResults[0].personalScore, 80);
   assert.equal(targets?.items[0].evaluationBands[0].judgementRaw, "A");
+  const answerMarks = result.normalization?.payloads.find((payload) => payload.type === "answer_marks");
+  assert.equal(validatePayloadJson(answerMarks).ok, true);
+  assert.equal(answerMarks?.items.length, 2);
+  assert.deepEqual(answerMarks?.items[0], [1, "1", "○", "CORRECT", "1", null]);
+  assert.deepEqual(answerMarks?.items[1], [1, "2", "N", "NO_ANSWER", "2", null]);
 });
 
 test("unknown, incomplete, and duplicate logical page schemes fail closed", () => {
@@ -107,7 +119,7 @@ test("mixed candidate pages are rejected before normalization", () => {
   const mixed = structuredClone(input);
   const pageFour = mixed.pages.find((page) => page.pageNumber === 4);
   pageFour.items = pageFour.items.map((entry) => entry.text === "12345678" ? { ...entry, text: "87654321" } : entry);
-  const result = runParserPipeline(mixed, createKawaiSchema(), { parserVersion: "kawai-parser@0.4.0", normalizationVersion: "normalization@0.1.0" });
+  const result = runParserPipeline(mixed, createKawaiSchema(), { parserVersion: "kawai-parser@0.5.0", normalizationVersion: "normalization@0.1.0" });
   assert.equal(result.status, "REJECTED");
   assert.ok(result.validation?.issues.some((entry) => entry.code === "KAWAI_MIXED_REPORT_IDENTITY"));
 });
@@ -117,7 +129,7 @@ test("missing subject rows cannot be registered as a successful parse", () => {
   const noScores = structuredClone(input);
   const pageOne = noScores.pages.find((page) => page.pageNumber === 1);
   pageOne.items = pageOne.items.filter((entry) => !entry.text.includes("68/100") && !entry.text.includes("-/100"));
-  const result = runParserPipeline(noScores, createKawaiSchema(), { parserVersion: "kawai-parser@0.4.0", normalizationVersion: "normalization@0.1.0" });
+  const result = runParserPipeline(noScores, createKawaiSchema(), { parserVersion: "kawai-parser@0.5.0", normalizationVersion: "normalization@0.1.0" });
   assert.equal(result.status, "REJECTED");
   assert.ok(result.validation?.issues.some((entry) => entry.code === "KAWAI_SUBJECT_SCORES_MISSING"));
 });
@@ -127,7 +139,7 @@ test("missing domain rows cannot be registered as a successful parse", () => {
   const noDomains = structuredClone(input);
   const pageTwo = noDomains.pages.find((page) => page.pageNumber === 2);
   pageTwo.items = pageTwo.items.filter((entry) => entry.y !== 105);
-  const result = runParserPipeline(noDomains, createKawaiSchema(), { parserVersion: "kawai-parser@0.4.0", normalizationVersion: "normalization@0.1.0" });
+  const result = runParserPipeline(noDomains, createKawaiSchema(), { parserVersion: "kawai-parser@0.5.0", normalizationVersion: "normalization@0.1.0" });
   assert.equal(result.status, "REJECTED");
   assert.ok(result.validation?.issues.some((entry) => entry.code === "KAWAI_DOMAIN_RESULTS_MISSING"));
 });
@@ -137,14 +149,24 @@ test("missing target schools cannot be registered as a successful parse", () => 
   const noTargets = structuredClone(input);
   const pageThree = noTargets.pages.find((page) => page.pageNumber === 3);
   pageThree.items = pageThree.items.filter((entry) => !/第\d志望/u.test(entry.text));
-  const result = runParserPipeline(noTargets, createKawaiSchema(), { parserVersion: "kawai-parser@0.4.0", normalizationVersion: "normalization@0.1.0" });
+  const result = runParserPipeline(noTargets, createKawaiSchema(), { parserVersion: "kawai-parser@0.5.0", normalizationVersion: "normalization@0.1.0" });
   assert.equal(result.status, "REJECTED");
   assert.ok(result.validation?.issues.some((entry) => entry.code === "KAWAI_TARGETS_MISSING"));
 });
 
+test("missing answer marks cannot be registered as a successful parse", () => {
+  const input = syntheticKawaiDocument();
+  const noAnswers = structuredClone(input);
+  const pageFour = noAnswers.pages.find((page) => page.pageNumber === 4);
+  pageFour.items = pageFour.items.filter((entry) => ![90, 98, 106, 114].includes(entry.y));
+  const result = runParserPipeline(noAnswers, createKawaiSchema(), { parserVersion: "kawai-parser@0.5.0", normalizationVersion: "normalization@0.1.0" });
+  assert.equal(result.status, "REJECTED");
+  assert.ok(result.validation?.issues.some((entry) => entry.code === "KAWAI_ANSWER_MARKS_MISSING"));
+});
+
 test("image-only four-page document is rejected before extraction", () => {
   const imageOnly = { pageCount: 4, pages: [1, 2, 3, 4].map((pageNumber) => ({ pageNumber, text: "", items: [] })) };
-  const result = runParserPipeline(imageOnly, createKawaiSchema(), { parserVersion: "kawai-parser@0.4.0", normalizationVersion: "normalization@0.1.0" });
+  const result = runParserPipeline(imageOnly, createKawaiSchema(), { parserVersion: "kawai-parser@0.5.0", normalizationVersion: "normalization@0.1.0" });
   assert.equal(result.status, "REJECTED");
   assert.equal(result.extraction, null);
 });

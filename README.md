@@ -36,6 +36,7 @@
 - [P2-T01 河合塾ページ判定・科目成績抽出](docs/tasks/P2-T01-kawai-parser-page1.md)
 - [P2-T02 河合塾分野別成績抽出](docs/tasks/P2-T02-kawai-domain-results.md)
 - [P2-T03 河合塾志望校別成績抽出](docs/tasks/P2-T03-kawai-target-schools.md)
+- [P2-T04 河合塾解答明細抽出](docs/tasks/P2-T04-kawai-answer-marks.md)
 - [P1-T10 分析クエリ契約](docs/tasks/P1-T10-analytics-contracts.md)
 - [P1-T11 ML CSV契約](docs/tasks/P1-T11-export-contracts.md)
 - [P1-T13 PIIスキャン初版](docs/tasks/P1-T13-security-pii-scan.md)
