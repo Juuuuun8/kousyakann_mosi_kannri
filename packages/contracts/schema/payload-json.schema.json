@@ -54,8 +54,9 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["domainRaw", "domainId", "score", "maxScore", "nationalAverage", "schoolAverage", "sameAbilityAverage", "scoreRateDifference", "evaluationCodeRaw", "nextLevelAverage", "commentaryRaw", "missingReason"],
+            "required": ["questionNumberRaw", "domainRaw", "domainId", "score", "maxScore", "nationalAverage", "schoolAverage", "sameAbilityAverage", "sameAbilityDifference", "scoreRateDifference", "evaluationCodeRaw", "nextLevelAverage", "nextLevelDifference", "commentaryRaw", "missingReason"],
             "properties": {
+              "questionNumberRaw": { "type": "string", "minLength": 1 },
               "domainRaw": { "type": "string", "minLength": 1 },
               "domainId": { "$ref": "#/$defs/nullableString" },
               "score": { "$ref": "#/$defs/nullableNumber" },
@@ -63,9 +64,11 @@
               "nationalAverage": { "$ref": "#/$defs/nullableNumber" },
               "schoolAverage": { "$ref": "#/$defs/nullableNumber" },
               "sameAbilityAverage": { "$ref": "#/$defs/nullableNumber" },
+              "sameAbilityDifference": { "$ref": "#/$defs/nullableNumber" },
               "scoreRateDifference": { "$ref": "#/$defs/nullableNumber" },
               "evaluationCodeRaw": { "$ref": "#/$defs/nullableString" },
               "nextLevelAverage": { "$ref": "#/$defs/nullableNumber" },
+              "nextLevelDifference": { "$ref": "#/$defs/nullableNumber" },
               "commentaryRaw": { "$ref": "#/$defs/nullableString" },
               "missingReason": { "$ref": "#/$defs/missingReason" }
             }

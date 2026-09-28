@@ -291,7 +291,25 @@ function validatePayloadJsonInternal(value: unknown, path: string, issues: Valid
     return;
   }
 
-  if (!["domain_results", "trend", "targets", "narrative", "raw_labels"].includes(value.type)) {
+  if (value.type === "domain_results") {
+    if (!isString(value.subject) || value.subject.length === 0) issues.push(issue(`${path}.subject`, "REQUIRED_STRING", "domain subject is required"));
+    const keys = ["questionNumberRaw", "domainRaw", "domainId", "score", "maxScore", "nationalAverage", "schoolAverage", "sameAbilityAverage", "sameAbilityDifference", "scoreRateDifference", "evaluationCodeRaw", "nextLevelAverage", "nextLevelDifference", "commentaryRaw", "missingReason"];
+    value.items.forEach((item, index) => {
+      const itemPath = `${path}.items[${index}]`;
+      if (!isRecord(item)) {
+        issues.push(issue(itemPath, "OBJECT", "domain item must be an object"));
+        return;
+      }
+      if (JSON.stringify(Object.keys(item).sort()) !== JSON.stringify([...keys].sort())) issues.push(issue(itemPath, "COLUMN_SET", "domain item contains missing or unknown fields"));
+      for (const key of ["questionNumberRaw", "domainRaw"]) if (!isString(item[key]) || item[key].length === 0) issues.push(issue(`${itemPath}.${key}`, "REQUIRED_STRING", `${key} is required`));
+      for (const key of ["domainId", "evaluationCodeRaw", "commentaryRaw"]) if (!isNullableString(item[key])) issues.push(issue(`${itemPath}.${key}`, "STRING_OR_NULL", `${key} must be a string or null`));
+      for (const key of ["score", "maxScore", "nationalAverage", "schoolAverage", "sameAbilityAverage", "sameAbilityDifference", "scoreRateDifference", "nextLevelAverage", "nextLevelDifference"]) if (!isNullableNumber(item[key])) issues.push(issue(`${itemPath}.${key}`, "NUMBER_OR_NULL", `${key} must be a finite number or null`));
+      if (!isNullableMissingReason(item.missingReason)) issues.push(issue(`${itemPath}.missingReason`, "ENUM", "unknown missing reason"));
+    });
+    return;
+  }
+
+  if (!["trend", "targets", "narrative", "raw_labels"].includes(value.type)) {
     issues.push(issue(`${path}.type`, "ENUM", "unknown payload type"));
   }
 }

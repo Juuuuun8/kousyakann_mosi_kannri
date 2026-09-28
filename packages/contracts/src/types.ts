@@ -121,6 +121,7 @@ export interface AnswerMarksPayload {
 }
 
 export interface DomainResultItem {
+  readonly questionNumberRaw: string;
   readonly domainRaw: string;
   readonly domainId: string | null;
   readonly score: NullableNumber;
@@ -128,9 +129,11 @@ export interface DomainResultItem {
   readonly nationalAverage: NullableNumber;
   readonly schoolAverage: NullableNumber;
   readonly sameAbilityAverage: NullableNumber;
+  readonly sameAbilityDifference: NullableNumber;
   readonly scoreRateDifference: NullableNumber;
   readonly evaluationCodeRaw: string | null;
   readonly nextLevelAverage: NullableNumber;
+  readonly nextLevelDifference: NullableNumber;
   readonly commentaryRaw: string | null;
   readonly missingReason: MissingReason | null;
 }

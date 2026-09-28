@@ -109,6 +109,13 @@ test("invalid enums, chunks, and payload tuples fail closed", () => {
   assert.equal(validatePayloadRecord({ ...payload, chunkIndex: 1 }).ok, false);
   assert.equal(validatePayloadRecord({ ...payload, payloadType: "DOMAIN" }).ok, false);
   assert.equal(validatePayloadJson({ ...payloadJson, items: [[1, "1"]] }).ok, false);
+  const incompleteDomain = {
+    v: 1,
+    type: "domain_results",
+    subject: "subject.synthetic",
+    items: [{ questionNumberRaw: "1", domainRaw: "合成分野" }],
+  };
+  assert.equal(validatePayloadJson(incompleteDomain).ok, false);
 });
 
 test("payload text has a hard provisional cell guard", () => {
