@@ -292,7 +292,10 @@ function validatePayloadJsonInternal(value: unknown, path: string, issues: Valid
   }
 
   if (value.type === "domain_results") {
+    const payloadKeys = ["v", "type", "subject", "commentaryRaw", "items"];
+    if (JSON.stringify(Object.keys(value).sort()) !== JSON.stringify([...payloadKeys].sort())) issues.push(issue(path, "COLUMN_SET", "domain payload contains missing or unknown fields"));
     if (!isString(value.subject) || value.subject.length === 0) issues.push(issue(`${path}.subject`, "REQUIRED_STRING", "domain subject is required"));
+    if (!isNullableString(value.commentaryRaw)) issues.push(issue(`${path}.commentaryRaw`, "STRING_OR_NULL", "domain commentary must be a string or null"));
     const keys = ["questionNumberRaw", "domainRaw", "domainId", "score", "maxScore", "nationalAverage", "schoolAverage", "sameAbilityAverage", "sameAbilityDifference", "scoreRateDifference", "evaluationCodeRaw", "nextLevelAverage", "nextLevelDifference", "commentaryRaw", "missingReason"];
     value.items.forEach((item, index) => {
       const itemPath = `${path}.items[${index}]`;

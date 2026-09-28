@@ -17,7 +17,7 @@
     "answerMarks": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["v", "type", "subject", "items"],
+      "required": ["v", "type", "subject", "commentaryRaw", "items"],
       "properties": {
         "v": { "const": 1 },
         "type": { "const": "answer_marks" },
@@ -49,6 +49,7 @@
         "v": { "const": 1 },
         "type": { "const": "domain_results" },
         "subject": { "type": "string", "minLength": 1 },
+        "commentaryRaw": { "$ref": "#/$defs/nullableString" },
         "items": {
           "type": "array",
           "items": {

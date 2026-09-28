@@ -78,6 +78,7 @@ export function makeSyntheticDomainResults(subject: string, count = 8): DomainPa
     v: 1,
     type: "domain_results",
     subject,
+    commentaryRaw: "合成科目講評",
     items: Array.from({ length: count }, (_, index) => ({
       questionNumberRaw: String(index + 1),
       domainRaw: `合成分野${index + 1}`,
@@ -92,7 +93,7 @@ export function makeSyntheticDomainResults(subject: string, count = 8): DomainPa
       evaluationCodeRaw: index % 4 === 0 ? "最良" : null,
       nextLevelAverage: 6 + (index % 3) / 10,
       nextLevelDifference: (index % 3 - 1) / 10,
-      commentaryRaw: `合成講評${index + 1}`,
+      commentaryRaw: null,
       missingReason: null,
     })),
   };

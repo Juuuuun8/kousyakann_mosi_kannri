@@ -142,6 +142,7 @@ export interface DomainPayload {
   readonly v: 1;
   readonly type: "domain_results";
   readonly subject: string;
+  readonly commentaryRaw: string | null;
   readonly items: readonly DomainResultItem[];
 }
 

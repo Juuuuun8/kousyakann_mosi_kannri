@@ -134,7 +134,7 @@ export function extractKawai(input: PdfTextDocument, detection: DetectResult): E
     fields,
     payloads: [payload, ...domainPayloads],
     evidence: detection.evidence,
-    issues: [issue("KAWAI_PARTIAL_EXTRACTION", "WARNING", "page 1 trend/conversion, page 2 commentary, page 3 target, and page 4 answer details remain transitional raw payloads")],
+    issues: [issue("KAWAI_PARTIAL_EXTRACTION", "WARNING", "page 1 trend/conversion, page 3 target, and page 4 answer details remain transitional raw payloads")],
   };
 }
 
