@@ -43,7 +43,7 @@ npm run build:demo
 npm run verify
 ```
 
-配備対象は `dist/` のみ。`vercel.json` がCSP、no-store、noindex、フレーム拒否等を設定する。ローカル生成したExcelは `outputs/` に置き、Git管理対象外とする。
+配備対象は `dist/` のみ。Cloudflare Pagesが `dist/_headers` を読み、CSP、APIレスポンスのno-store、noindex、フレーム拒否等を設定する。ローカル生成したExcelは `outputs/` に置き、Git管理対象外とする。
 
 ## 承認後の交換点
 
