@@ -68,6 +68,7 @@ npm run verify
 - [Phase 3 承認後結合・運用計画](docs/plans/phase-3-integration-and-operations.md)
 - [仕様・実装 客観監査報告書 2026-09-29](docs/reviews/spec-implementation-audit-2026-09-29.md)
 - [Phase 3 本番結合・受入・運用 詳細実装計画 v2](docs/plans/phase-3-production-implementation-plan-v2.md)
+- [仕様v1.1 決定台帳](docs/decisions/phase-3-v1.1-decision-register.md)
 - [承認前完了レビュー 2026-09-29](docs/reviews/preapproval-completion-review-2026-09-29.md)
 - [会社デモ構成・制約・説明ポイント 2026-09-29](docs/reviews/company-demo-2026-09-29.md)
 - [Phase 1 初期決定記録（レビュー待ち）](docs/decisions/phase-1-initial-decisions.md)

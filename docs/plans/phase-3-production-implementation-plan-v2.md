@@ -1,7 +1,7 @@
 # Phase 3 本番結合・受入・運用 詳細実装計画 v2
 
 - 作成日: 2026-09-29
-- 状態: 利用者レビュー待ち
+- 状態: 利用者承認済み（2026-09-29）。個別の会社承認事項は未承認
 - 対象: 会社承認後のCloudflare Pages/Functions、GAS、Google Sheets結合とpilot
 - 前提: `spec-implementation-audit-2026-09-29.md`のP0を解消する
 - 旧計画: `phase-3-integration-and-operations.md`を詳細化し、本書を優先する
@@ -342,8 +342,8 @@ Lunaへ渡す各taskは、少なくとも次を埋める。
 
 ## 14. 直近の進め方
 
-1. 本監査書と本計画へ利用者がfeedbackする。
-2. P3A-T01の未決事項だけをdecision listへする。
+1. 本監査書と本計画は2026-09-29に利用者承認済み。
+2. P3A-T01の未決事項を`phase-3-v1.1-decision-register.md`で管理する。
 3. 会社説明は現行の合成デモで行い、未接続であることを明示する。
 4. 会社承認までは外部資源を増やさず、P3Aの文書・test設計を詰める。
 5. 承認後、G1から順に一taskずつ実装・検証・feedbackする。
