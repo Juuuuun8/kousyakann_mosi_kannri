@@ -8,6 +8,7 @@
     "packages/parsers/*"
   ],
   "scripts": {
+    "build:demo": "node scripts/build-demo-site.mjs",
     "test": "node scripts/run-package-tests.mjs",
     "typecheck": "node scripts/run-typecheck.mjs",
     "security": "node scripts/pii-scan.mjs --history",

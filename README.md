@@ -4,7 +4,21 @@
 
 ## 現在の状態
 
-会社承認前の設計・準備段階です。本番GAS、職場Google Drive、実データには接続しません。初期対象帳票Parser、分析集計、正本保存・認証・通信・監査・ML出力の純粋契約、合成UI、CI品質ゲートまでを実装済みです。外部サービスへ接続するアダプタは承認後タスクとして分離しています。
+会社承認前の設計・準備段階です。本番GAS、職場Google Drive、実データには接続しません。初期対象帳票Parser、分析集計、正本保存・認証・通信・監査・ML出力の純粋契約、会社説明用の架空データデモ、CI品質ゲートまでを実装済みです。外部サービスへ接続するアダプタは承認後タスクとして分離しています。
+
+## 会社説明用デモ
+
+河合塾・全統共通テスト模試の帳票項目を参考に、24人・3校舎・2回次・7科目の完全な架空データを生成します。概要、校舎・学校比較、科目、分野、設問、志望校、個人推移、品質確認、匿名化ML CSV出力を同一画面で確認できます。
+
+```powershell
+node scripts/generate-demo-dataset.mjs
+npm run build:demo
+npm run verify
+```
+
+`dist/` が配備対象です。元PDF、仕様書、Excel、テスト、開発用パッケージは含めません。デモ画面とGoogle Sheetsデモは同じ生成済みデータセットを使用しますが、承認前はブラウザから非公開Sheetを直接読みません。本番ではGAS認証済みアダプタへ交換します。
+
+- [会社デモ構成・制約・説明ポイント](docs/reviews/company-demo-2026-09-29.md)
 
 ## 最上位の制約
 
@@ -53,6 +67,7 @@
 - [P2-T13 PDF登録・ML出力安全UI](docs/tasks/P2-T13-input-and-export-safety-ui.md)
 - [Phase 3 承認後結合・運用計画](docs/plans/phase-3-integration-and-operations.md)
 - [承認前完了レビュー 2026-09-29](docs/reviews/preapproval-completion-review-2026-09-29.md)
+- [会社デモ構成・制約・説明ポイント 2026-09-29](docs/reviews/company-demo-2026-09-29.md)
 - [Phase 1 初期決定記録（レビュー待ち）](docs/decisions/phase-1-initial-decisions.md)
 - [実装横断レビュー 2026-09-28](docs/reviews/implementation-review-2026-09-28.md)
 - [個人情報の保存境界](docs/security/privacy-boundary.md)

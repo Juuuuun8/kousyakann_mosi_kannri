@@ -14,7 +14,9 @@ const blockedTokens = [
   ["カノ", "ン"].join(""),
   ["札幌", "旭丘"].join(""),
 ];
-const ignoredDirectories = new Set([".git", "node_modules", "tmp", "temp", "dist", "coverage"]);
+// `outputs` is gitignored and contains locally generated, explicitly synthetic
+// review artifacts. Git history is still scanned independently below.
+const ignoredDirectories = new Set([".git", "node_modules", "tmp", "temp", "dist", "coverage", "outputs"]);
 const textExtensions = new Set([".js", ".mjs", ".ts", ".json", ".md", ".html", ".css", ".yml", ".yaml"]);
 const secretPatterns = [
   [/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/u, "private key"],

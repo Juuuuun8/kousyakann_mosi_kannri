@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { validateAnalyticsResult } from "../../analytics-contracts/src/index.ts";
 import { answerCompositionModel, comparisonSummaryModel, domainTableModel, domainTrendModel, subjectTableModel, targetSummaryModel } from "../src/analytics-view-model.js";
+import { createDemoModel, createMlDemoRows } from "../src/demo-engine.js";
 import { syntheticAnswerResult, syntheticComparisonResult, syntheticDomainComparisonResult, syntheticDomainResult, syntheticSubjectResult, syntheticTargetResult } from "../src/synthetic-analytics-results.js";
 
 const root = new URL("../", import.meta.url);
@@ -20,10 +21,12 @@ async function text(file) {
 test("prototype exposes the approved tabs and exception states", async () => {
   const html = await text("index.html");
   const app = await text("src/app.js");
-  assert.doesNotThrow(() => new Function(app.replace(/^import .*$/gmu, "")));
+  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+  assert.doesNotThrow(() => new AsyncFunction(app.replace(/^import .*$/gmu, "")));
   for (const token of ["概要", "校舎・学校比較", "科目・分野", "志望校", "個人詳細", "データ管理", "ML出力"]) assert.match(html, new RegExp(token));
   for (const state of ["loading", "empty", "suppressed", "partial", "schema", "permission"]) assert.match(app, new RegExp(state));
-  assert.doesNotMatch(app, /localStorage|sessionStorage|indexedDB|fetch\(/);
+  assert.match(app, /fetch\("\.\/data\/demo-dataset\.json"/u);
+  assert.doesNotMatch(app, /localStorage|sessionStorage|indexedDB|https?:\/\//u);
 });
 
 test("prototype has no direct student identifiers in aggregate display code", async () => {
@@ -33,7 +36,7 @@ test("prototype has no direct student identifiers in aggregate display code", as
 
 test("analysis shows decision evidence without prescribing instruction", async () => {
   const app = await text("src/app.js");
-  for (const token of ["得点率の分布", "四分位", "同一受験者", "平均ボーダー差", "母数", "データ完全率"]) {
+  for (const token of ["得点率の分布", "四分位", "同一受験者", "ボーダー差", "対象生徒", "品質サマリ"]) {
     assert.match(app, new RegExp(token));
   }
   assert.doesNotMatch(app, /重点候補|指導対象|推奨指導|指導すべき/);
@@ -117,4 +120,23 @@ test("ML export prototype requires purpose and explicit handling confirmation", 
   assert.match(app, /id="export-confirm"/u);
   assert.match(app, /id="export-button"[^>]+disabled/u);
   assert.match(app, /用途限定、適切な保存、利用後の削除/u);
+});
+
+test("demo sheet snapshot recomputes filters, suppression, missingness, and ML rows", async () => {
+  const dataset = JSON.parse(await text("data/demo-dataset.json"));
+  const all = createDemoModel(dataset, { suppressionThreshold: 5 });
+  assert.equal(all.overview.students, 24);
+  assert.equal(all.overview.missingCount, 1);
+  assert.equal(all.comparison.comparableCount, 24);
+  assert.equal(all.groups.filter((item) => item.kind === "校舎").length, 3);
+
+  const oneLocation = createDemoModel(dataset, { locationId: "loc.sapporo", suppressionThreshold: 5 });
+  assert.equal(oneLocation.overview.students, 8);
+  const oneSchool = createDemoModel(dataset, { schoolId: "school.north", suppressionThreshold: 5 });
+  assert.equal(oneSchool.overview.students, 4);
+  assert.equal(oneSchool.suppressed, true);
+
+  const mlRows = createMlDemoRows(dataset, all);
+  assert.equal(mlRows.length, 168);
+  assert.equal(mlRows.every((row) => row.ML_ID.startsWith("demo_ml_") && !("PersonID" in row) && !("DisplayLabel" in row)), true);
 });

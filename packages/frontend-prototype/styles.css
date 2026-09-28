@@ -21,8 +21,9 @@ body { margin: 0; background: #eef2f4; color: var(--ink); }
 .eyebrow { margin: 0; color: var(--muted); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
 .topbar .eyebrow { color: #a9d3dd; }
 .role-badge, .version-chip { border: 1px solid rgba(255,255,255,0.22); border-radius: 999px; padding: 9px 13px; font-size: 0.77rem; white-space: nowrap; }
-.topbar-actions { display: flex; align-items: center; gap: 9px; }
+.topbar-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
 .topbar-link { color: #fff; text-decoration: none; }
+.demo-badge { background: #fff3da; border-color: #e0a23a; color: #774600; font-weight: 800; }
 .shell { width: min(1380px, calc(100% - 32px)); margin: 24px auto 64px; }
 .tabs { display: flex; gap: 5px; overflow-x: auto; padding: 4px; background: var(--paper); border: 1px solid var(--line); border-radius: 14px; }
 .tab { border: 0; border-radius: 10px; padding: 12px 15px; background: transparent; color: var(--muted); cursor: pointer; font: inherit; font-weight: 700; white-space: nowrap; }
@@ -55,8 +56,9 @@ select, input { width: 100%; border: 1px solid var(--line); border-radius: 9px; 
 .chart-title { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
 .chart-title strong { font-size: 0.85rem; }
 .chart-title span, .chart-note { color: var(--muted); font-size: 0.72rem; }
-.histogram { display: grid; grid-template-columns: repeat(10, 1fr); align-items: end; gap: 7px; height: 150px; padding: 16px 8px 22px; border-bottom: 1px solid var(--line); }
+.histogram { display: grid; grid-template-columns: repeat(10, 1fr); align-items: end; gap: 7px; height: 174px; padding: 16px 8px 38px; border-bottom: 1px solid var(--line); }
 .hist-column { display: grid; align-content: end; justify-items: center; gap: 5px; height: 100%; color: var(--muted); font-size: 0.62rem; }
+.hist-column small { font-size: 0.58rem; }
 .hist-bar { width: min(28px, 80%); min-height: 3px; border-radius: 5px 5px 2px 2px; background: #5e9db0; }
 .hist-column.is-median .hist-bar { background: var(--accent); }
 .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; color: var(--muted); font-size: 0.72rem; }

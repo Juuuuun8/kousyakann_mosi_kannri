@@ -4,16 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
-    <title>模試成績分析（合成プロトタイプ）</title>
+    <title>模試成績分析（会社説明用デモ）</title>
     <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
     <header class="topbar">
       <div>
-        <p class="eyebrow">Kousyakann Mosi Kannri / prototype</p>
+        <p class="eyebrow">Kousyakann Mosi Kannri / company demo</p>
         <h1>模試成績分析</h1>
       </div>
-      <div class="topbar-actions"><span class="role-badge" aria-label="現在の権限">ADMIN · 全校舎閲覧</span><a class="role-badge topbar-link" href="./upload.html">PDF登録</a><a class="role-badge topbar-link" href="./login.html">ログイン画面</a></div>
+      <div class="topbar-actions"><span class="role-badge demo-badge">架空データのみ</span><span class="role-badge" aria-label="現在の権限">ADMIN · 全校舎閲覧</span><a class="role-badge topbar-link" href="./upload.html">PDF登録</a><a class="role-badge topbar-link" href="./login.html">ログイン画面</a></div>
     </header>
 
     <main class="shell">
@@ -33,21 +33,21 @@
             <p class="eyebrow">COMMON FILTER</p>
             <h2 id="filter-title">対象を絞り込む</h2>
           </div>
-          <span class="version-chip">ExamEvent · 2026 / Round 2</span>
+          <span id="dataset-version" class="version-chip">データ読込中</span>
         </div>
         <div class="filter-grid">
-          <label>校舎<select><option>全校舎</option><option>合成校舎A</option><option>合成校舎B</option></select></label>
-          <label>高校<select><option>全高校</option><option>合成高校A</option><option>合成高校B</option></select></label>
-          <label>科目<select><option>全科目</option><option>英語</option><option>数学</option><option>国語</option></select></label>
+          <label>校舎<select id="location-filter"><option value="all">全校舎</option></select></label>
+          <label>高校<select id="school-filter"><option value="all">全高校</option></select></label>
+          <label>科目<select id="subject-filter"><option value="all">全科目</option></select></label>
           <label>比較基準<select><option>全体</option><option>全国掲載値</option><option>同学力帯掲載値</option><option>前回同一Person</option></select></label>
-          <label>抑制人数<input type="number" value="5" min="1" step="1"></label>
+          <label>抑制人数<input id="suppression-filter" type="number" value="5" min="1" max="20" step="1"></label>
         </div>
-        <div class="filter-footnote">システムは観測値と比較根拠を提示します。解釈と指導方針は、講師・社員が判断します。母数・除外数・欠損理由は各表示に併記します。</div>
+        <div id="data-summary" class="filter-footnote">架空データを読み込んでいます。</div>
       </section>
 
       <section class="state-preview" aria-labelledby="state-title">
         <div>
-          <p class="eyebrow">DEVELOPMENT PREVIEW</p>
+            <p class="eyebrow">DEMO STATE PREVIEW</p>
           <h2 id="state-title">状態表示の確認</h2>
         </div>
         <label>状態<select id="state-select">

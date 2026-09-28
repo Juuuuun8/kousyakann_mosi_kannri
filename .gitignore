@@ -24,6 +24,7 @@ test-data/private/
 # Generated and local files
 node_modules/
 dist/
+outputs/
 coverage/
 .wrangler/
 .clasp.json
@@ -32,3 +33,5 @@ temp/
 *.log
 .DS_Store
 Thumbs.db
+
+.vercel
