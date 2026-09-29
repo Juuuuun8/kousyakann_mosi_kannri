@@ -152,7 +152,13 @@ function registrationSummary(data, people, events) {
   const personIds = new Set(people.map((item) => item.personId));
   const eventIds = new Set(events.map((item) => item.id));
   const reports = data.reports.filter((row) => (!row.personId || personIds.has(row.personId)) && eventIds.has(row.eventId));
-  const progress = data.expectedByEventLocation.filter((row) => eventIds.has(row.eventId) && (row.locationId === "all" || people.some((person) => person.locationId === row.locationId)));
+  const progress = events.flatMap((event) => data.locations.map((location, locationIndex) => {
+    const expectedPeople = people.filter((person) => person.locationId === location.id);
+    if (!expectedPeople.length) return null;
+    const expectedIds = new Set(expectedPeople.map((person) => person.personId));
+    const registered = reports.filter((row) => row.eventId === event.id && row.locationId === location.id && row.status === "ACTIVE" && expectedIds.has(row.personId)).length;
+    return { eventId: event.id, locationId: location.id, expected: expectedPeople.length, registered, errors: (event.round + locationIndex) % 9 === 0 ? 1 : 0 };
+  })).filter(Boolean);
   return { active: reports.filter((row) => row.status === "ACTIVE").length, pending: reports.filter((row) => row.status === "PENDING").length, superseded: reports.filter((row) => row.status === "SUPERSEDED").length, progress };
 }
 
