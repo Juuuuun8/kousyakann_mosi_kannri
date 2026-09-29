@@ -191,5 +191,5 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .metric-grid, .metric-grid.three { grid-template-columns: 1fr 1fr; gap: 8px; }.metric-card { min-height: 110px; padding: 14px; }.metric-card strong { font-size: 1.35rem; }.card { padding: 16px; }
   .insight-list li { grid-template-columns: auto 1fr; }.insight-list button { grid-column: 2; justify-self: start; }.subject-grid { grid-template-columns: 1fr; }.chart-labels { overflow-x: auto; grid-template-columns: repeat(5, minmax(76px, 1fr)); }
   .person-picker { align-items: stretch; flex-direction: column; }.person-picker div { flex-wrap: wrap; }.capability-grid { grid-template-columns: 1fr; }.student-subjects > div { grid-template-columns: 85px 1fr 44px; }.student-subjects small { display: none; }
-  .side-nav { overflow-x: auto; grid-template-columns: repeat(7, minmax(64px, 1fr)); }.upload-grid, .verification-list { grid-template-columns: 1fr; }
+  .side-nav { overflow-x: hidden; grid-template-columns: repeat(7, minmax(0, 1fr)); }.nav-item { min-width: 0; font-size: .57rem; }.upload-grid, .verification-list { grid-template-columns: 1fr; }
 }
