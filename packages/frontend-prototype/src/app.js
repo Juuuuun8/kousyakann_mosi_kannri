@@ -76,7 +76,7 @@ function quality(model) {
 }
 
 function ml(model) {
-  return `<section class="panel"><div class="panel-heading"><div><p class="eyebrow">ML EXPORT / DEMO</p><h2>ML用CSV</h2></div><span class="status-pill warn">架空データのみ実行可能</span></div><div class="notice warn"><div class="notice-icon" aria-hidden="true">!</div><div><h3>端末ダウンロード</h3><p>直接識別子を除外した固定列CSVを生成します。このデモの全データは架空です。</p></div></div><div class="export-confirm"><label>利用目的<input id="export-purpose" type="text" maxlength="120" placeholder="例：会社説明用デモ"></label><label class="check-row"><input id="export-confirm" type="checkbox">用途限定、適切な保存、利用後の削除が必要なことを確認しました</label><p id="export-status" class="privacy-line" aria-live="polite">確認後に${createMlDemoRows(data, model).length}行の架空CSVを生成できます。</p></div><div class="panel-footer"><button id="export-button" class="action" type="button" disabled>架空CSVを生成</button></div></section>`;
+  return `<section class="panel"><div class="panel-heading"><div><p class="eyebrow">ML EXPORT / DEMO</p><h2>ML用CSV</h2></div><span class="status-pill warn">架空データのみ実行可能</span></div><div class="notice warn"><div class="notice-icon" aria-hidden="true">!</div><div><h3>端末ダウンロード</h3><p>直接識別子を除外した固定列CSVを生成します。このデモの全データは架空です。</p></div></div><div class="export-confirm"><label>利用目的<input id="export-purpose" type="text" maxlength="120" placeholder="例：分析モデル検証"></label><label class="check-row"><input id="export-confirm" type="checkbox">用途限定、適切な保存、利用後の削除が必要なことを確認しました</label><p id="export-status" class="privacy-line" aria-live="polite">確認後に${createMlDemoRows(data, model).length}行の架空CSVを生成できます。</p></div><div class="panel-footer"><button id="export-button" class="action" type="button" disabled>架空CSVを生成</button></div></section>`;
 }
 
 function csvCell(value) {

@@ -80,13 +80,18 @@ test("analytics result adapters expose evidence and suppression without direct i
   assert.equal(answers.parts.find((part) => part.label === "余分マーク")?.rate, .01);
 });
 
-test("login prototype does not persist or transmit credentials", async () => {
+test("sample login remains local and opens the dashboard with a native form fallback", async () => {
   const html = await text("login.html");
   const script = await text("src/login.js");
   assert.match(html, /autocomplete="username"/);
   assert.match(html, /autocomplete="current-password"/);
-  assert.match(html, /平文パスワードを権限管理シートへ保存せず/);
-  assert.match(script, /querySelector\("#password"\)\.value = ""/);
+  assert.match(html, /サンプル環境/);
+  assert.match(html, /demo\.admin@example\.invalid/);
+  assert.match(html, /action="\.\/dashboard\.html" method="get"/);
+  assert.match(html, /id="login-button"[^>]+type="submit"/);
+  assert.match(script, /form\.addEventListener\("submit"/);
+  assert.match(script, /event\.preventDefault\(\)/);
+  assert.match(script, /password\.value = ""/);
   assert.doesNotMatch(`${html}\n${script}`, /localStorage|sessionStorage|indexedDB|fetch\(|console\./);
 });
 
@@ -94,6 +99,7 @@ test("upload prototype keeps PDF handling local and fails closed before parser c
   const html = await text("upload.html");
   const script = await text("src/upload.js");
   assert.match(html, /登録校舎/u);
+  assert.match(html, /href="\.\/dashboard\.html">分析画面/u);
   assert.match(html, /accept="application\/pdf,.pdf"/u);
   assert.match(html, /id="register"[^>]+disabled/u);
   assert.match(script, /file\.arrayBuffer\(\)/u);

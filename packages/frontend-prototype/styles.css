@@ -104,6 +104,11 @@ select, input { width: 100%; border: 1px solid var(--line); border-radius: 9px; 
 .auth-help { margin: 18px 0 0; color: var(--muted); font-size: 0.73rem; line-height: 1.65; }
 .auth-error { margin-top: 14px; color: var(--danger); font-size: 0.8rem; }
 .auth-error[hidden] { display: none; }
+.login-page .topbar { padding-block: 18px; }
+.login-page .auth-shell { min-height: calc(100vh - 92px); padding-block: 16px; }
+.login-page .auth-card { padding: 24px 30px; }
+.login-page .auth-form { gap: 12px; margin-top: 16px; }
+.login-page .auth-help { margin-top: 12px; }
 .upload-shell { width: min(920px, calc(100% - 32px)); margin: 28px auto 56px; display: grid; gap: 18px; }
 .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .file-picker input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

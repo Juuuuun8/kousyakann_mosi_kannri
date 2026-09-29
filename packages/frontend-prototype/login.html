@@ -4,26 +4,31 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
-    <title>ログイン（合成プロトタイプ）</title>
+    <title>模試成績管理｜ログイン</title>
     <link rel="stylesheet" href="./styles.css">
   </head>
-  <body>
+  <body class="login-page">
     <header class="topbar">
-      <div><p class="eyebrow">Kousyakann Mosi Kannri / prototype</p><h1>模試成績管理</h1></div>
-      <div class="topbar-actions"><span class="role-badge">会社承認前 · 本番未接続</span><a class="role-badge topbar-link" href="./upload.html">PDF登録画面</a></div>
+      <div><p class="eyebrow">Kousyakann Mosi Kannri</p><h1>模試成績管理</h1></div>
+      <div class="topbar-actions"><span class="role-badge">サンプル環境</span></div>
     </header>
     <main class="auth-shell">
       <section class="auth-card" aria-labelledby="login-title">
         <p class="eyebrow">SIGN IN</p>
         <h2 id="login-title">ログイン</h2>
-        <p class="auth-description">管理者が事前登録したメールアドレスとパスワードを入力してください。権限はログイン後も各APIで再確認します。</p>
-        <form id="login-form" class="auth-form" novalidate>
-          <label>メールアドレス<input id="email" name="email" type="email" inputmode="email" autocomplete="username" required></label>
-          <label>パスワード<input id="password" name="password" type="password" autocomplete="current-password" minlength="15" maxlength="128" required></label>
-          <button class="action" type="submit">ログイン</button>
+        <p class="auth-description">メールアドレスとパスワードを入力してください。</p>
+        <div class="notice warn" aria-label="テスト用ログイン情報">
+          <div class="notice-icon" aria-hidden="true">i</div>
+          <div><h3>テスト用アカウント</h3><p>メール: <strong>demo.admin@example.invalid</strong><br>パスワード: <strong>demo-admin-password</strong></p></div>
+        </div>
+        <form id="login-form" class="auth-form" action="./dashboard.html" method="get">
+          <label>メールアドレス<input id="email" type="email" inputmode="email" autocomplete="username" required></label>
+          <label>パスワード<input id="password" type="password" autocomplete="current-password" minlength="15" maxlength="128" required></label>
+          <button id="demo-fill" class="secondary" type="button">テストIDを入力</button>
+          <button id="login-button" class="action" type="submit">ログイン</button>
         </form>
         <p id="login-error" class="auth-error" role="alert" hidden>メールアドレスまたはパスワードを確認してください。</p>
-        <p class="auth-help">この画面は表示確認用です。入力値を保存・送信しません。本番では平文パスワードを権限管理シートへ保存せず、復元できない検証値だけを保持します。</p>
+        <p class="auth-help">この画面では入力内容を保存・送信しません。</p>
       </section>
     </main>
     <script type="module" src="./src/login.js"></script>
