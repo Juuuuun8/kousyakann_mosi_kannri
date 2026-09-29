@@ -38,3 +38,6 @@ temp/
 Thumbs.db
 
 .vercel
+.env
+.env.*
+!.env.example
