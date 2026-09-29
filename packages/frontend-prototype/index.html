@@ -4,66 +4,60 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="referrer" content="no-referrer">
-    <title>模試成績分析</title>
+    <title>模試成績ダッシュボード</title>
     <link rel="stylesheet" href="./styles.css">
   </head>
-  <body>
+  <body class="dashboard-page">
+    <a class="skip-link" href="#app">分析内容へ移動</a>
     <header class="topbar">
-      <div>
-        <p class="eyebrow">Kousyakann Mosi Kannri</p>
-        <h1>模試成績分析</h1>
+      <a class="brand" href="./dashboard.html" aria-label="模試成績管理 ホーム">
+        <span class="brand-mark" aria-hidden="true">成</span>
+        <span><strong>模試成績管理</strong><small>全校舎の状況をひとつに</small></span>
+      </a>
+      <div class="topbar-actions">
+        <span class="demo-badge">架空データ</span>
+        <span class="user-badge">管理者</span>
+        <a class="header-link primary" href="./upload.html">PDFを登録</a>
+        <a class="header-link" href="./login.html">ログアウト</a>
       </div>
-      <div class="topbar-actions"><span class="role-badge demo-badge">架空データのみ</span><span class="role-badge" aria-label="現在の権限">ADMIN · 全校舎閲覧</span><a class="role-badge topbar-link" href="./upload.html">PDF登録</a><a class="role-badge topbar-link" href="./login.html">ログイン画面</a></div>
     </header>
 
-    <main class="shell">
-      <nav class="tabs" aria-label="分析タブ" role="tablist">
-        <button class="tab is-active" data-tab="overview" role="tab" aria-selected="true" aria-controls="app">概要</button>
-        <button class="tab" data-tab="groups" role="tab" aria-selected="false" aria-controls="app" tabindex="-1">校舎・学校比較</button>
-        <button class="tab" data-tab="subjects" role="tab" aria-selected="false" aria-controls="app" tabindex="-1">科目・分野</button>
-        <button class="tab" data-tab="targets" role="tab" aria-selected="false" aria-controls="app" tabindex="-1">志望校</button>
-        <button class="tab" data-tab="individual" role="tab" aria-selected="false" aria-controls="app" tabindex="-1">個人詳細</button>
-        <button class="tab" data-tab="quality" role="tab" aria-selected="false" aria-controls="app" tabindex="-1">データ管理</button>
-        <button class="tab" data-tab="ml" role="tab" aria-selected="false" aria-controls="app" tabindex="-1">ML出力</button>
+    <div class="app-layout">
+      <nav class="side-nav" aria-label="主な機能" role="tablist">
+        <p class="nav-heading">分析</p>
+        <button class="nav-item is-active" data-tab="overview" role="tab" aria-selected="true" aria-controls="app"><span aria-hidden="true">⌂</span>現在地</button>
+        <button class="nav-item" data-tab="compare" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">⇄</span>比較</button>
+        <button class="nav-item" data-tab="subjects" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">▦</span>教科・設問</button>
+        <button class="nav-item" data-tab="targets" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">◎</span>志望校</button>
+        <button class="nav-item" data-tab="individual" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">人</span>生徒</button>
+        <p class="nav-heading">管理</p>
+        <button class="nav-item" data-tab="registration" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">✓</span>登録状況</button>
+        <button class="nav-item" data-tab="ml" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">↓</span>ML用出力</button>
       </nav>
 
-      <section class="toolbar" aria-labelledby="filter-title">
-        <div class="toolbar-heading">
-          <div>
-            <p class="eyebrow">COMMON FILTER</p>
-            <h2 id="filter-title">対象を絞り込む</h2>
+      <main class="main-content">
+        <section class="page-intro">
+          <div><p class="overline">分析ダッシュボード</p><h1 id="page-title">現在地</h1><p id="page-description">全校舎の最新状況と、前回からの変化を確認できます。</p></div>
+          <span id="dataset-version" class="version-chip">読込中</span>
+        </section>
+
+        <details class="filter-panel" open>
+          <summary><span><strong>表示するデータ</strong><small id="scope-summary">架空データを読み込んでいます</small></span><span class="summary-action">条件を変更</span></summary>
+          <div class="filter-grid">
+            <label>模試の種類<select id="definition-filter"><option value="all">すべての模試</option></select></label>
+            <label>表示期間<select id="period-filter"><option value="all">登録済みの全期間</option><option value="latest-3">直近3回</option><option value="latest">最新回だけ</option></select></label>
+            <label>校舎<select id="location-filter"><option value="all">全校舎</option></select></label>
+            <label>高校<select id="school-filter"><option value="all">全高校</option></select></label>
+            <label>学年<select id="grade-filter"><option value="all">全学年</option><option>高3</option><option>高2</option></select></label>
+            <label>教科<select id="subject-filter"><option value="all">全教科</option></select></label>
+            <button id="reset-filters" class="text-button" type="button">条件を元に戻す</button>
           </div>
-          <span id="dataset-version" class="version-chip">データ読込中</span>
-        </div>
-        <div class="filter-grid">
-          <label>校舎<select id="location-filter"><option value="all">全校舎</option></select></label>
-          <label>高校<select id="school-filter"><option value="all">全高校</option></select></label>
-          <label>科目<select id="subject-filter"><option value="all">全科目</option></select></label>
-          <label>比較基準<select><option>全体</option><option>全国掲載値</option><option>同学力帯掲載値</option><option>前回同一Person</option></select></label>
-          <label>抑制人数<input id="suppression-filter" type="number" value="5" min="1" max="20" step="1"></label>
-        </div>
-        <div id="data-summary" class="filter-footnote">架空データを読み込んでいます。</div>
-      </section>
+        </details>
 
-      <section class="state-preview" aria-labelledby="state-title">
-        <div>
-            <p class="eyebrow">DEMO STATE PREVIEW</p>
-          <h2 id="state-title">状態表示の確認</h2>
-        </div>
-        <label>状態<select id="state-select">
-          <option value="ready">Ready</option>
-          <option value="loading">Loading</option>
-          <option value="empty">Empty</option>
-          <option value="suppressed">Suppressed</option>
-          <option value="partial">Partial data</option>
-          <option value="schema">Schema mismatch</option>
-          <option value="permission">No permission</option>
-        </select></label>
-      </section>
-
-      <section id="app" role="tabpanel" aria-live="polite" tabindex="0"></section>
-    </main>
-
+        <section id="app" role="tabpanel" aria-live="polite" tabindex="0"></section>
+        <p class="demo-notice">このデモは架空データのみを使用しています。数値・学校名・志望先は実在の情報ではありません。</p>
+      </main>
+    </div>
     <script type="module" src="./src/app.js"></script>
   </body>
 </html>

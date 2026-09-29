@@ -4,140 +4,161 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const output = path.join(root, "packages", "frontend-prototype", "data", "demo-dataset.json");
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const round1 = (value) => Math.round(value * 10) / 10;
 
 const locations = [
   { id: "loc.sapporo", label: "札幌駅前校" },
   { id: "loc.asahikawa", label: "旭川校" },
   { id: "loc.obihiro", label: "帯広校" },
+  { id: "loc.hakodate", label: "函館校" },
 ];
-const schools = [
-  { id: "school.north", label: "北星高校", locationId: "loc.sapporo" },
-  { id: "school.central", label: "中央高校", locationId: "loc.sapporo" },
-  { id: "school.asahi", label: "旭丘高校", locationId: "loc.asahikawa" },
-  { id: "school.river", label: "河畔高校", locationId: "loc.asahikawa" },
-  { id: "school.tokachi", label: "十勝高校", locationId: "loc.obihiro" },
-  { id: "school.east", label: "東陵高校", locationId: "loc.obihiro" },
+const schoolNames = ["北星高校", "中央高校", "旭丘高校", "河畔高校", "十勝高校", "東陵高校", "函館南高校", "港陵高校"];
+const schools = schoolNames.map((label, index) => ({ id: `school.${index + 1}`, label, locationId: locations[Math.floor(index / 2)].id }));
+const examDefinitions = [
+  { id: "kawai.ct", label: "全統共通テスト模試", scale: "score-rate" },
+  { id: "kawai.written", label: "全統記述模試", scale: "deviation" },
 ];
 const examEvents = [
-  { id: "kawai.ct.2026.round-1", year: 2026, round: 1, label: "第1回 全統共通テスト模試", examDate: "2026-05-03" },
-  { id: "kawai.ct.2026.round-2", year: 2026, round: 2, label: "第2回 全統共通テスト模試", examDate: "2026-08-09" },
+  { id: "ct.2025.3", definitionId: "kawai.ct", year: 2025, round: 3, label: "2025年度 第3回 全統共通テスト模試", shortLabel: "25年 共テ③", examDate: "2025-10-05" },
+  { id: "ct.2026.1", definitionId: "kawai.ct", year: 2026, round: 1, label: "2026年度 第1回 全統共通テスト模試", shortLabel: "共テ①", examDate: "2026-05-03" },
+  { id: "wr.2026.1", definitionId: "kawai.written", year: 2026, round: 1, label: "2026年度 第1回 全統記述模試", shortLabel: "記述①", examDate: "2026-05-17" },
+  { id: "ct.2026.2", definitionId: "kawai.ct", year: 2026, round: 2, label: "2026年度 第2回 全統共通テスト模試", shortLabel: "共テ②", examDate: "2026-08-09" },
+  { id: "wr.2026.2", definitionId: "kawai.written", year: 2026, round: 2, label: "2026年度 第2回 全統記述模試", shortLabel: "記述②", examDate: "2026-09-06" },
 ];
 const subjectDefinitions = [
-  { id: "english-reading", label: "英語リーディング", shortLabel: "英語R", maxScore: 100, nationalAverage: 61 },
-  { id: "english-listening", label: "英語リスニング", shortLabel: "英語L", maxScore: 100, nationalAverage: 58 },
-  { id: "math-1a", label: "数学Ⅰ・A", shortLabel: "数学ⅠA", maxScore: 100, nationalAverage: 55 },
-  { id: "math-2bc", label: "数学Ⅱ・B・C", shortLabel: "数学ⅡBC", maxScore: 100, nationalAverage: 50 },
-  { id: "japanese", label: "国語", shortLabel: "国語", maxScore: 200, nationalAverage: 62 },
-  { id: "science", label: "理科", shortLabel: "理科", maxScore: 100, nationalAverage: 56 },
-  { id: "information-1", label: "情報Ⅰ", shortLabel: "情報Ⅰ", maxScore: 100, nationalAverage: 64 },
-];
-const subjectAdjustments = [-2, 4, -5, -8, 2, 0, 3];
-const targetLabels = ["北海総合大学", "札幌未来大学", "道央教育大学", "北日本工科大学"];
-const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-const round1 = (value) => Math.round(value * 10) / 10;
+  ["english-reading", "英語リーディング", "英語R", 100, 61], ["english-listening", "英語リスニング", "英語L", 100, 58],
+  ["math-1a", "数学Ⅰ・A", "数学ⅠA", 100, 55], ["math-2bc", "数学Ⅱ・B・C", "数学ⅡBC", 100, 50],
+  ["japanese", "国語", "国語", 200, 62], ["modern-japanese", "近代以降の文章", "現代文", 110, 64],
+  ["classical-japanese", "古文", "古文", 45, 54], ["kanbun", "漢文", "漢文", 45, 55],
+  ["geography", "地理総合・地理探究", "地理", 100, 58], ["japanese-history", "歴史総合・日本史探究", "日本史", 100, 57],
+  ["world-history", "歴史総合・世界史探究", "世界史", 100, 56], ["public-ethics", "公共・倫理", "倫理", 100, 59],
+  ["public-politics", "公共・政治経済", "政経", 100, 58], ["physics", "物理", "物理", 100, 55],
+  ["chemistry", "化学", "化学", 100, 53], ["biology", "生物", "生物", 100, 57],
+  ["earth-science", "地学", "地学", 100, 56], ["information-1", "情報Ⅰ", "情報Ⅰ", 100, 64],
+].map(([id, label, shortLabel, maxScore, nationalAverage], order) => ({ id, label, shortLabel, maxScore, nationalAverage, order }));
 
-const students = Array.from({ length: 24 }, (_, index) => {
+const domainsBySubject = {
+  "english-reading": ["論理展開", "要旨把握", "情報検索", "語彙・表現"],
+  "english-listening": ["短い会話", "図表・講義", "複数話者"],
+  "math-1a": ["数と式", "二次関数", "図形と計量", "場合の数と確率", "データの分析"],
+  "math-2bc": ["微分・積分", "数列", "統計的な推測", "ベクトル"],
+  japanese: ["論理的文章", "文学的文章", "実用的文章"],
+  "modern-japanese": ["評論", "小説"], "classical-japanese": ["古文読解"], kanbun: ["漢文読解"],
+  physics: ["力学", "波動", "電磁気"], chemistry: ["理論化学", "無機化学", "有機化学"],
+  "information-1": ["情報社会", "プログラミング", "データ活用"],
+};
+const domainDefinitions = Object.entries(domainsBySubject).flatMap(([subjectId, labels]) => labels.map((label, index) => ({ id: `${subjectId}.${index + 1}`, subjectId, label, order: index })));
+const targetDefinitions = [
+  ["hokkai", "北海総合大学", "総合政策学部"], ["sapporo", "札幌未来大学", "データ科学部"], ["do-o", "道央教育大学", "教育学部"],
+  ["north-tech", "北日本工科大学", "工学部"], ["hakodate", "函館国際大学", "国際学部"], ["tokachi", "十勝生命大学", "生命科学部"],
+].map(([id, university, faculty]) => ({ id: `target.${id}`, university, faculty, label: `${university} ${faculty}` }));
+
+const courses = ["国公立文系", "国公立理系", "私立文系", "私立理系"];
+const students = Array.from({ length: 72 }, (_, index) => {
   const location = locations[index % locations.length];
   const schoolOptions = schools.filter((school) => school.locationId === location.id);
   return {
     personId: `demo-person-${String(index + 1).padStart(3, "0")}`,
     displayLabel: `デモ生徒${String(index + 1).padStart(2, "0")}`,
     locationId: location.id,
-    schoolId: schoolOptions[Math.floor(index / locations.length) % schoolOptions.length].id,
-    grade: index % 5 === 0 ? "高2" : "高3",
+    schoolId: schoolOptions[Math.floor(index / locations.length) % 2].id,
+    grade: index % 9 < 2 ? "高2" : "高3",
+    course: courses[index % courses.length],
   };
 });
+
+function takesSubject(student, subjectId, event) {
+  if (event.definitionId === "kawai.written" && ["english-listening", "information-1", "public-ethics", "public-politics"].includes(subjectId)) return false;
+  if (["modern-japanese", "classical-japanese", "kanbun"].includes(subjectId)) return event.definitionId === "kawai.ct";
+  if (["geography", "japanese-history", "world-history", "public-ethics", "public-politics"].includes(subjectId)) return (student.personId.charCodeAt(student.personId.length - 1) + subjectId.length) % 5 === 0;
+  if (["physics", "chemistry", "biology", "earth-science"].includes(subjectId)) return (student.course.includes("理系") && ["physics", "chemistry"].includes(subjectId)) || (!student.course.includes("理系") && subjectId === "biology");
+  return true;
+}
 
 const scores = [];
 const reports = [];
 for (const [studentIndex, student] of students.entries()) {
-  const baseAbility = 43 + ((studentIndex * 7) % 39);
+  const ability = 38 + ((studentIndex * 11) % 48);
   for (const [eventIndex, event] of examEvents.entries()) {
-    const reportId = `demo-report-${studentIndex + 1}-${eventIndex + 1}`;
-    reports.push({ reportId, personId: student.personId, eventId: event.id, locationId: student.locationId, status: "ACTIVE", schemaVersion: eventIndex === 0 ? "kawai.ct.v1" : "kawai.ct.v2", completeness: 1 });
+    const absentReport = (studentIndex + eventIndex * 7) % 37 === 0;
+    const reportId = `report.${studentIndex + 1}.${eventIndex + 1}`;
+    reports.push({ reportId, personId: student.personId, eventId: event.id, locationId: student.locationId, status: absentReport ? "PENDING" : "ACTIVE", completeness: absentReport ? .25 : 1, schemaVersion: event.definitionId === "kawai.ct" ? "kawai.ct.v2" : "kawai.written.demo.v1" });
+    if (absentReport) continue;
     for (const [subjectIndex, subject] of subjectDefinitions.entries()) {
-      const missingReason = (studentIndex === 22 && eventIndex === 1 && subject.id === "math-2bc") || (studentIndex === 23 && eventIndex === 0 && subject.id === "english-listening") ? "NOT_TAKEN" : null;
-      if (missingReason) {
-        scores.push({ reportId, personId: student.personId, eventId: event.id, locationId: student.locationId, schoolId: student.schoolId, subjectId: subject.id, score: null, maxScore: subject.maxScore, scoreRate: null, nationalAverage: subject.nationalAverage, deviation: null, abilityLevel: null, missingReason });
-        continue;
-      }
-      const eventGain = eventIndex === 0 ? 0 : 2 + ((studentIndex + subjectIndex) % 6);
-      const variation = ((studentIndex * 3 + subjectIndex * 5 + eventIndex * 2) % 9) - 4;
-      const scoreRate = clamp((baseAbility + subjectAdjustments[subjectIndex] + eventGain + variation) / 100, .23, .96);
-      const score = Math.round(scoreRate * subject.maxScore);
-      const deviation = round1(50 + ((score / subject.maxScore * 100) - subject.nationalAverage) * .46);
-      const abilityLevel = deviation >= 65 ? "S" : deviation >= 60 ? "A" : deviation >= 55 ? "B" : deviation >= 50 ? "C" : deviation >= 45 ? "D" : "E";
-      scores.push({ reportId, personId: student.personId, eventId: event.id, locationId: student.locationId, schoolId: student.schoolId, subjectId: subject.id, score, maxScore: subject.maxScore, scoreRate: round1(score / subject.maxScore * 100) / 100, nationalAverage: subject.nationalAverage, deviation, abilityLevel, missingReason: null });
+      if (!takesSubject(student, subject.id, event)) continue;
+      const missingReason = (studentIndex * 5 + eventIndex * 3 + subjectIndex) % 113 === 0 ? "NOT_TAKEN" : null;
+      const gain = eventIndex * 1.8 + ((studentIndex + subjectIndex) % 5) * .6;
+      const variation = ((studentIndex * 3 + subjectIndex * 7 + eventIndex * 5) % 15) - 7;
+      const rate = clamp((ability + gain + variation + (subjectIndex % 4 - 1.5) * 2) / 100, .18, .98);
+      const score = missingReason ? null : Math.round(rate * subject.maxScore);
+      const deviation = missingReason ? null : round1(50 + (rate * 100 - subject.nationalAverage) * .42 + (event.definitionId === "kawai.written" ? 1.5 : 0));
+      scores.push({ personId: student.personId, eventId: event.id, subjectId: subject.id, score, maxScore: subject.maxScore, scoreRate: score === null ? null : round1(score / subject.maxScore * 100), nationalAverageRate: subject.nationalAverage, deviation, schoolRank: score === null ? null : 1 + ((studentIndex * 7 + subjectIndex) % 180), nationalRank: score === null ? null : 100 + ((studentIndex * 971 + subjectIndex * 137) % 62000), abilityLevel: deviation === null ? null : deviation >= 65 ? "S" : deviation >= 60 ? "A" : deviation >= 55 ? "B" : deviation >= 50 ? "C" : deviation >= 45 ? "D" : "E", missingReason });
     }
   }
 }
-reports.push(
-  { reportId: "demo-report-pending", personId: null, eventId: examEvents[1].id, locationId: locations[0].id, status: "PENDING", schemaVersion: "kawai.ct.v2", completeness: .45 },
-  { reportId: "demo-report-superseded", personId: students[0].personId, eventId: examEvents[1].id, locationId: locations[0].id, status: "SUPERSEDED", schemaVersion: "kawai.ct.v2", completeness: 1 },
-);
+reports.push({ reportId: "report.superseded", personId: students[0].personId, eventId: "ct.2026.2", locationId: students[0].locationId, status: "SUPERSEDED", completeness: 1, schemaVersion: "kawai.ct.v1" });
 
-const domainDefinitions = [
-  { id: "math.probability", label: "場合の数と確率", maxScore: 30 },
-  { id: "math.figures", label: "図形の性質", maxScore: 30 },
-  { id: "math.data", label: "データの分析", maxScore: 40 },
-];
 const domains = [];
 for (const [studentIndex, student] of students.entries()) {
   for (const [eventIndex, event] of examEvents.entries()) {
     for (const [domainIndex, domain] of domainDefinitions.entries()) {
-      const rate = clamp((42 + ((studentIndex * 7) % 39) + (eventIndex ? 4 : 0) + [1, -4, 3][domainIndex] + ((studentIndex + domainIndex) % 7 - 3)) / 100, .15, .98);
-      const score = Math.round(rate * domain.maxScore);
-      const nationalRate = [.54, .49, .58][domainIndex];
-      domains.push({ personId: student.personId, eventId: event.id, locationId: student.locationId, schoolId: student.schoolId, subjectId: "math-1a", domainId: domain.id, score, maxScore: domain.maxScore, scoreRate: round1(score / domain.maxScore * 100) / 100, nationalAverageRate: nationalRate, sameAbilityAverageRate: clamp(nationalRate + .04, 0, 1), missingReason: null });
+      if (!takesSubject(student, domain.subjectId, event)) continue;
+      const parent = scores.find((row) => row.personId === student.personId && row.eventId === event.id && row.subjectId === domain.subjectId && row.scoreRate !== null);
+      if (!parent) continue;
+      const scoreRate = clamp(parent.scoreRate + ((studentIndex + domainIndex * 3) % 17) - 8, 5, 100);
+      const nationalAverageRate = clamp(subjectDefinitions.find((item) => item.id === domain.subjectId).nationalAverage + (domainIndex % 5 - 2) * 2, 30, 80);
+      domains.push({ personId: student.personId, eventId: event.id, subjectId: domain.subjectId, domainId: domain.id, scoreRate: round1(scoreRate), nationalAverageRate, sameAbilityAverageRate: clamp(nationalAverageRate + 4, 0, 100), higherJudgementAverageRate: clamp(nationalAverageRate + 9, 0, 100) });
     }
   }
 }
 
-const currentScores = scores.filter((item) => item.eventId === examEvents[1].id && item.scoreRate !== null);
-const targets = students.map((student, index) => {
-  const personScores = currentScores.filter((item) => item.personId === student.personId);
-  const meanRate = personScores.reduce((sum, item) => sum + item.scoreRate, 0) / personScores.length;
-  const targetIndex = index % targetLabels.length;
-  const targetDifficulty = [.69, .62, .57, .53][targetIndex];
-  const borderGap = Math.round((meanRate - targetDifficulty) * 100);
-  const judgement = borderGap >= 8 ? "A" : borderGap >= 1 ? "B" : borderGap >= -7 ? "C" : borderGap >= -14 ? "D" : "E";
-  return { personId: student.personId, eventId: examEvents[1].id, preferenceOrder: 1, targetId: `target-${targetIndex + 1}`, targetLabel: targetLabels[targetIndex], judgement, borderGap, metric: "score-rate-point" };
-});
+const targets = [];
+for (const [studentIndex, student] of students.entries()) {
+  for (const event of examEvents.filter((item) => item.definitionId === "kawai.ct" && item.year === 2026)) {
+    const personScores = scores.filter((row) => row.personId === student.personId && row.eventId === event.id && row.scoreRate !== null && !["modern-japanese", "classical-japanese", "kanbun"].includes(row.subjectId));
+    if (!personScores.length) continue;
+    const overall = personScores.reduce((sum, row) => sum + row.scoreRate, 0) / personScores.length;
+    for (let preferenceOrder = 1; preferenceOrder <= 3; preferenceOrder += 1) {
+      const definition = targetDefinitions[(studentIndex + preferenceOrder - 1) % targetDefinitions.length];
+      const border = 52 + ((studentIndex + preferenceOrder * 5) % 20);
+      const borderGap = round1(overall - border);
+      const judgement = borderGap >= 8 ? "A" : borderGap >= 2 ? "B" : borderGap >= -5 ? "C" : borderGap >= -12 ? "D" : "E";
+      targets.push({ personId: student.personId, eventId: event.id, preferenceOrder, targetId: definition.id, targetLabel: definition.label, judgement, borderGap, capacity: 40 + preferenceOrder * 20, rank: 1 + ((studentIndex * 13 + preferenceOrder * 7) % 260), population: 280 });
+    }
+  }
+}
 
-const answers = students.map((student) => {
-  const score = currentScores.find((item) => item.personId === student.personId && item.subjectId === "math-1a");
-  const rate = score?.scoreRate ?? 0;
-  const correct = Math.round(40 * rate * .82);
-  const partial = Math.round(40 * rate * .18);
-  const blank = rate < .5 ? 3 : rate < .7 ? 2 : 1;
-  const extra = Number(student.personId.endsWith("007") || student.personId.endsWith("019"));
-  const wrong = 40 - correct - partial - blank - extra;
-  return { personId: student.personId, eventId: examEvents[1].id, subjectId: "math-1a", correct, wrong, partial, blank, extra };
-});
+const answers = [];
+const questionSubjects = ["english-reading", "math-1a", "japanese", "information-1"];
+for (const [studentIndex, student] of students.entries()) {
+  for (const event of examEvents.filter((item) => item.definitionId === "kawai.ct")) {
+    for (const subjectId of questionSubjects) {
+      const parent = scores.find((row) => row.personId === student.personId && row.eventId === event.id && row.subjectId === subjectId && row.scoreRate !== null);
+      if (!parent) continue;
+      for (let question = 1; question <= 12; question += 1) {
+        const expected = (parent.scoreRate + ((question * 7 + studentIndex) % 19) - 9) / 100;
+        const roll = ((studentIndex * 17 + question * 13 + event.round * 11) % 100) / 100;
+        const result = roll < expected * .82 ? "correct" : roll < expected ? "partial" : roll > .93 ? "blank" : roll > .9 ? "extra" : "wrong";
+        answers.push({ personId: student.personId, eventId: event.id, subjectId, majorQuestion: Math.ceil(question / 3), questionNumber: question, result });
+      }
+    }
+  }
+}
+
+const expectedByEventLocation = [];
+for (const event of examEvents) for (const location of locations) {
+  const expected = students.filter((student) => student.locationId === location.id && (event.year === 2026 || student.grade === "高3")).length;
+  const active = reports.filter((row) => row.eventId === event.id && row.locationId === location.id && row.status === "ACTIVE").length;
+  expectedByEventLocation.push({ eventId: event.id, locationId: location.id, expected, registered: active, errors: (event.round + locations.indexOf(location)) % 9 === 0 ? 1 : 0 });
+}
 
 const dataset = {
-  meta: {
-    datasetVersion: "demo-sheet.v1",
-    generatedAt: "2026-09-29T00:00:00Z",
-    title: "全統共通テスト模試 架空デモデータ",
-    sourceStructure: "河合塾・全統共通テスト模試 個人成績表（4ページ構成）",
-    notice: "すべて架空データです。実在の生徒・学校・成績とは関係ありません。",
-    activeEventId: examEvents[1].id,
-    baselineEventId: examEvents[0].id,
-  },
-  locations,
-  schools,
-  examEvents,
-  subjectDefinitions,
-  domainDefinitions,
-  students,
-  reports,
-  scores,
-  domains,
-  targets,
-  answers,
+  meta: { datasetVersion: "demo-sheet.v2", generatedAt: "2026-09-30T00:00:00Z", title: "模試成績管理 架空デモデータ", notice: "すべて架空データです。実在の生徒・学校・成績とは関係ありません。", activeEventId: "ct.2026.2", baselineEventId: "ct.2026.1" },
+  sourceCapabilities: { summaryMetrics: 14, convertedScores: 12, privateEvaluationMetrics: 5, trendRecords: 33, domainResults: 50, targets: 7, answerMarks: 477 },
+  locations, schools, examDefinitions, examEvents, subjectDefinitions, domainDefinitions, targetDefinitions, students, reports, scores, domains, targets, answers, expectedByEventLocation,
 };
 
 await mkdir(path.dirname(output), { recursive: true });
-await writeFile(output, `${JSON.stringify(dataset, null, 2)}\n`, "utf8");
-process.stdout.write(`Generated ${output}\nStudents: ${students.length}; scores: ${scores.length}; domains: ${domains.length}\n`);
+await writeFile(output, JSON.stringify(dataset), "utf8");
+process.stdout.write(`Generated demo-sheet.v2: ${students.length} students, ${scores.length} scores, ${domains.length} domains, ${answers.length} answers\n`);

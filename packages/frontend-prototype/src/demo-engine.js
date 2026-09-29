@@ -1,5 +1,5 @@
 const mean = (values) => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
-const round = (value, digits = 1) => value === null ? null : Number(value.toFixed(digits));
+const round = (value, digits = 1) => value === null || Number.isNaN(value) ? null : Number(value.toFixed(digits));
 
 function quantile(values, position) {
   if (!values.length) return null;
@@ -7,195 +7,184 @@ function quantile(values, position) {
   const index = (sorted.length - 1) * position;
   const lower = Math.floor(index);
   const upper = Math.ceil(index);
-  if (lower === upper) return sorted[lower];
-  return sorted[lower] + (sorted[upper] - sorted[lower]) * (index - lower);
+  return lower === upper ? sorted[lower] : sorted[lower] + (sorted[upper] - sorted[lower]) * (index - lower);
 }
 
 function summarize(values) {
-  return {
-    count: values.length,
-    mean: round(mean(values)),
-    minimum: round(values.length ? Math.min(...values) : null),
-    p25: round(quantile(values, .25)),
-    median: round(quantile(values, .5)),
-    p75: round(quantile(values, .75)),
-    maximum: round(values.length ? Math.max(...values) : null),
-  };
+  return { count: values.length, mean: round(mean(values)), minimum: round(values.length ? Math.min(...values) : null), p25: round(quantile(values, .25)), median: round(quantile(values, .5)), p75: round(quantile(values, .75)), maximum: round(values.length ? Math.max(...values) : null) };
 }
 
-function indexBy(items, key = "id") { return new Map(items.map((item) => [item[key], item])); }
-function averageStudentRate(scores) {
-  const valid = scores.filter((item) => item.score !== null && item.maxScore > 0);
-  const score = valid.reduce((sum, item) => sum + item.score, 0);
-  const maxScore = valid.reduce((sum, item) => sum + item.maxScore, 0);
-  return maxScore ? score / maxScore * 100 : null;
+function selectedEvents(data, filters) {
+  const ids = filters.eventIds?.length ? new Set(filters.eventIds) : new Set(data.examEvents.map((item) => item.id));
+  return data.examEvents.filter((event) => ids.has(event.id) && (filters.definitionId === "all" || event.definitionId === filters.definitionId));
 }
 
 function cohort(data, filters) {
   return data.students.filter((student) =>
     (filters.locationId === "all" || student.locationId === filters.locationId) &&
-    (filters.schoolId === "all" || student.schoolId === filters.schoolId));
+    (filters.schoolId === "all" || student.schoolId === filters.schoolId) &&
+    (filters.grade === "all" || student.grade === filters.grade));
 }
 
-function scoreRows(data, students, eventId, subjectId) {
-  const people = new Set(students.map((item) => item.personId));
-  return data.scores.filter((item) => people.has(item.personId) && item.eventId === eventId && (subjectId === "all" || item.subjectId === subjectId));
+function studentRate(rows) {
+  const valid = rows.filter((row) => row.score !== null && row.maxScore > 0 && !["modern-japanese", "classical-japanese", "kanbun"].includes(row.subjectId));
+  const total = valid.reduce((sum, row) => sum + row.score, 0);
+  const max = valid.reduce((sum, row) => sum + row.maxScore, 0);
+  return max ? total / max * 100 : null;
 }
 
-function studentRates(data, students, eventId, subjectId) {
-  const rows = scoreRows(data, students, eventId, subjectId);
-  return students.map((student) => ({ personId: student.personId, value: averageStudentRate(rows.filter((item) => item.personId === student.personId)) })).filter((item) => item.value !== null);
+function getRows(data, people, events, subjectId = "all") {
+  const personIds = new Set(people.map((item) => item.personId));
+  const eventIds = new Set(events.map((item) => item.id));
+  return data.scores.filter((row) => personIds.has(row.personId) && eventIds.has(row.eventId) && (subjectId === "all" || row.subjectId === subjectId));
 }
 
-function histogram(values) {
-  const bins = Array.from({ length: 10 }, (_, index) => ({ start: index * 10, count: 0 }));
-  for (const value of values) bins[Math.min(9, Math.max(0, Math.floor(value / 10)))].count += 1;
-  return bins;
-}
-
-function comparison(data, students, subjectId) {
-  const current = new Map(studentRates(data, students, data.meta.activeEventId, subjectId).map((item) => [item.personId, item.value]));
-  const baseline = new Map(studentRates(data, students, data.meta.baselineEventId, subjectId).map((item) => [item.personId, item.value]));
-  const changes = [];
-  const bands = [
-    { id: "lt50", label: "前回50%未満", min: -Infinity, max: 50, values: [] },
-    { id: "50-65", label: "前回50–65%", min: 50, max: 65, values: [] },
-    { id: "65-80", label: "前回65–80%", min: 65, max: 80, values: [] },
-    { id: "gte80", label: "前回80%以上", min: 80, max: Infinity, values: [] },
-  ];
-  for (const student of students) {
-    const before = baseline.get(student.personId);
-    const after = current.get(student.personId);
-    if (before === undefined || after === undefined) continue;
-    const change = after - before;
-    changes.push(change);
-    bands.find((band) => before >= band.min && before < band.max).values.push(change);
-  }
-  return {
-    comparableCount: changes.length,
-    excludedCount: students.length - changes.length,
-    summary: summarize(changes),
-    bands: bands.map((band) => ({ id: band.id, label: band.label, count: band.values.length, mean: round(mean(band.values)) })),
-  };
-}
-
-function subjectSummary(data, students) {
-  const subjectMap = indexBy(data.subjectDefinitions);
-  const rows = scoreRows(data, students, data.meta.activeEventId, "all");
-  return data.subjectDefinitions.map((subject) => {
-    const subjectRows = rows.filter((item) => item.subjectId === subject.id);
-    const valid = subjectRows.filter((item) => item.scoreRate !== null);
-    const rates = valid.map((item) => item.scoreRate * 100);
-    return {
-      id: subject.id,
-      label: subjectMap.get(subject.id).label,
-      sampleCount: valid.length,
-      excludedCount: subjectRows.length - valid.length,
-      rate: summarize(rates),
-      nationalGap: round(mean(valid.map((item) => item.scoreRate * 100 - item.nationalAverage))),
-      deviation: round(mean(valid.map((item) => item.deviation))),
-    };
-  });
-}
-
-function groupSummary(data, students, filters) {
-  const locations = indexBy(data.locations);
-  const schools = indexBy(data.schools);
-  const groups = [
-    ...data.locations.map((item) => ({ kind: "校舎", id: item.id, label: item.label, students: students.filter((student) => student.locationId === item.id) })),
-    ...data.schools.map((item) => ({ kind: "高校", id: item.id, label: item.label, students: students.filter((student) => student.schoolId === item.id) })),
-  ].filter((item) => item.students.length);
-  return groups.map((group) => {
-    const rates = studentRates(data, group.students, data.meta.activeEventId, filters.subjectId).map((item) => item.value);
-    return { kind: group.kind, id: group.id, label: group.label, sampleCount: rates.length, rate: summarize(rates), suppressed: rates.length < filters.suppressionThreshold };
-  });
-}
-
-function domainSummary(data, students, filters) {
-  const people = new Set(students.map((item) => item.personId));
-  const definitions = indexBy(data.domainDefinitions);
-  const current = data.domains.filter((item) => people.has(item.personId) && item.eventId === data.meta.activeEventId && (filters.subjectId === "all" || filters.subjectId === item.subjectId));
-  const baseline = data.domains.filter((item) => people.has(item.personId) && item.eventId === data.meta.baselineEventId && (filters.subjectId === "all" || filters.subjectId === item.subjectId));
-  const baselineMap = new Map(baseline.map((item) => [`${item.personId}|${item.domainId}`, item.scoreRate]));
-  return data.domainDefinitions.map((definition) => {
-    const rows = current.filter((item) => item.domainId === definition.id && item.scoreRate !== null);
-    const rates = rows.map((item) => item.scoreRate * 100);
-    const changes = rows.map((item) => {
-      const before = baselineMap.get(`${item.personId}|${item.domainId}`);
-      return before === undefined ? null : (item.scoreRate - before) * 100;
+function eventSummary(data, people, events, subjectId) {
+  return events.map((event) => {
+    const rows = getRows(data, people, [event], subjectId);
+    const byPerson = people.map((person) => {
+      const personRows = rows.filter((row) => row.personId === person.personId);
+      if (subjectId !== "all") return personRows.find((row) => row.scoreRate !== null)?.scoreRate ?? null;
+      return studentRate(personRows);
     }).filter((value) => value !== null);
-    return { id: definition.id, label: definitions.get(definition.id).label, sampleCount: rows.length, rate: summarize(rates), nationalGap: round(mean(rows.map((item) => (item.scoreRate - item.nationalAverageRate) * 100))), sameAbilityGap: round(mean(rows.map((item) => (item.scoreRate - item.sameAbilityAverageRate) * 100))), previousChange: round(mean(changes)), comparableCount: changes.length };
+    const deviations = rows.filter((row) => row.deviation !== null).map((row) => row.deviation);
+    return { ...event, participants: byPerson.length, rate: summarize(byPerson), deviation: summarize(deviations) };
   });
 }
 
-function targetSummary(data, students) {
-  const people = new Set(students.map((item) => item.personId));
-  const rows = data.targets.filter((item) => people.has(item.personId));
-  const counts = new Map(["A", "B", "C", "D", "E"].map((key) => [key, 0]));
-  rows.forEach((item) => counts.set(item.judgement, counts.get(item.judgement) + 1));
-  return { sampleCount: rows.length, counts: [...counts].map(([label, count]) => ({ label, count })), borderGap: summarize(rows.map((item) => item.borderGap)), targetGroups: [...new Set(rows.map((item) => item.targetLabel))].map((label) => ({ label, count: rows.filter((item) => item.targetLabel === label).length })) };
+function subjectSummary(data, people, events) {
+  return data.subjectDefinitions.map((subject) => {
+    const rows = getRows(data, people, events, subject.id);
+    const valid = rows.filter((row) => row.scoreRate !== null);
+    const recentEvent = [...events].reverse().find((event) => valid.some((row) => row.eventId === event.id));
+    const recent = valid.filter((row) => row.eventId === recentEvent?.id);
+    return {
+      ...subject,
+      sampleCount: recent.length,
+      rate: summarize(recent.map((row) => row.scoreRate)),
+      deviation: summarize(recent.map((row) => row.deviation).filter((value) => value !== null)),
+      nationalGap: round(mean(recent.map((row) => row.scoreRate - row.nationalAverageRate))),
+      trend: events.map((event) => ({ eventId: event.id, value: round(mean(valid.filter((row) => row.eventId === event.id).map((row) => row.scoreRate))), count: valid.filter((row) => row.eventId === event.id).length })),
+    };
+  }).filter((row) => row.sampleCount > 0);
 }
 
-function answerSummary(data, students) {
-  const people = new Set(students.map((item) => item.personId));
-  const rows = data.answers.filter((item) => people.has(item.personId));
-  const keys = ["correct", "wrong", "partial", "blank", "extra"];
-  const total = rows.reduce((sum, row) => sum + keys.reduce((inner, key) => inner + row[key], 0), 0);
-  return { sampleCount: rows.length, parts: keys.map((key) => ({ key, count: rows.reduce((sum, row) => sum + row[key], 0), rate: total ? rows.reduce((sum, row) => sum + row[key], 0) / total : 0 })) };
+function comparisonSummary(data, people, events, subjectId) {
+  const comparableEvents = events.filter((event) => event.definitionId === "kawai.ct").slice(-2);
+  if (comparableEvents.length < 2) return { events: comparableEvents, comparableCount: 0, excludedCount: people.length, change: summarize([]), improved: 0, unchanged: 0, declined: 0 };
+  const [before, after] = comparableEvents;
+  const changes = [];
+  for (const person of people) {
+    const beforeRows = getRows(data, [person], [before], subjectId);
+    const afterRows = getRows(data, [person], [after], subjectId);
+    const beforeValue = subjectId === "all" ? studentRate(beforeRows) : beforeRows.find((row) => row.scoreRate !== null)?.scoreRate ?? null;
+    const afterValue = subjectId === "all" ? studentRate(afterRows) : afterRows.find((row) => row.scoreRate !== null)?.scoreRate ?? null;
+    if (beforeValue !== null && afterValue !== null) changes.push(afterValue - beforeValue);
+  }
+  return { events: comparableEvents, comparableCount: changes.length, excludedCount: people.length - changes.length, change: summarize(changes), improved: changes.filter((value) => value >= 3).length, unchanged: changes.filter((value) => value > -3 && value < 3).length, declined: changes.filter((value) => value <= -3).length };
 }
 
-function individualSummary(data, students, subjectId, requestedPersonId) {
-  const person = students.find((item) => item.personId === requestedPersonId) ?? students[0] ?? null;
-  if (!person) return null;
-  const subjects = indexBy(data.subjectDefinitions);
-  const byEvent = data.examEvents.map((event) => {
-    const rows = scoreRows(data, [person], event.id, subjectId);
-    return { eventId: event.id, label: event.label, rate: round(averageStudentRate(rows)), deviation: round(mean(rows.filter((item) => item.deviation !== null).map((item) => item.deviation))) };
-  });
-  const currentRows = scoreRows(data, [person], data.meta.activeEventId, "all").filter((item) => item.scoreRate !== null);
-  return { person, byEvent, subjects: currentRows.map((item) => ({ id: item.subjectId, label: subjects.get(item.subjectId).shortLabel, rate: round(item.scoreRate * 100), deviation: item.deviation, abilityLevel: item.abilityLevel })) };
+function groupSummary(data, people, events, subjectId, threshold) {
+  const definitions = [
+    ...data.locations.map((item) => ({ ...item, kind: "校舎", member: (person) => person.locationId === item.id })),
+    ...data.schools.map((item) => ({ ...item, kind: "高校", member: (person) => person.schoolId === item.id })),
+  ];
+  const latest = events.at(-1);
+  return definitions.map((group) => {
+    const members = people.filter(group.member);
+    const values = members.map((person) => {
+      const rows = getRows(data, [person], latest ? [latest] : [], subjectId);
+      return subjectId === "all" ? studentRate(rows) : rows.find((row) => row.scoreRate !== null)?.scoreRate ?? null;
+    }).filter((value) => value !== null);
+    return { kind: group.kind, id: group.id, label: group.label, sampleCount: values.length, rate: summarize(values), suppressed: values.length < threshold };
+  }).filter((group) => group.sampleCount > 0);
 }
 
-export function createDemoModel(data, filters = {}) {
-  const normalized = {
-    locationId: filters.locationId ?? "all",
-    schoolId: filters.schoolId ?? "all",
-    subjectId: filters.subjectId ?? "all",
-    suppressionThreshold: Number(filters.suppressionThreshold ?? 5),
-    personId: filters.personId ?? null,
-  };
-  const students = cohort(data, normalized);
-  const rates = studentRates(data, students, data.meta.activeEventId, normalized.subjectId).map((item) => item.value);
-  const activeRows = scoreRows(data, students, data.meta.activeEventId, normalized.subjectId);
+function domainSummary(data, people, events, subjectId) {
+  const personIds = new Set(people.map((item) => item.personId));
+  const eventIds = new Set(events.map((item) => item.id));
+  const rows = data.domains.filter((row) => personIds.has(row.personId) && eventIds.has(row.eventId) && (subjectId === "all" || row.subjectId === subjectId));
+  return data.domainDefinitions.map((definition) => {
+    const relevant = rows.filter((row) => row.domainId === definition.id);
+    const latestEvent = [...events].reverse().find((event) => relevant.some((row) => row.eventId === event.id));
+    const latest = relevant.filter((row) => row.eventId === latestEvent?.id);
+    return {
+      ...definition,
+      sampleCount: latest.length,
+      rate: summarize(latest.map((row) => row.scoreRate)),
+      nationalGap: round(mean(latest.map((row) => row.scoreRate - row.nationalAverageRate))),
+      sameAbilityGap: round(mean(latest.map((row) => row.scoreRate - row.sameAbilityAverageRate))),
+      higherJudgementGap: round(mean(latest.map((row) => row.scoreRate - row.higherJudgementAverageRate))),
+      trend: events.map((event) => ({ eventId: event.id, value: round(mean(relevant.filter((row) => row.eventId === event.id).map((row) => row.scoreRate))) })),
+    };
+  }).filter((row) => row.sampleCount > 0);
+}
+
+function answerSummary(data, people, events, subjectId) {
+  const personIds = new Set(people.map((item) => item.personId));
+  const eventIds = new Set(events.map((item) => item.id));
+  const rows = data.answers.filter((row) => personIds.has(row.personId) && eventIds.has(row.eventId) && (subjectId === "all" || row.subjectId === subjectId));
+  const results = ["correct", "wrong", "partial", "blank", "extra"];
+  const parts = results.map((key) => ({ key, count: rows.filter((row) => row.result === key).length, rate: rows.length ? rows.filter((row) => row.result === key).length / rows.length : 0 }));
+  const questions = [...new Set(rows.map((row) => `${row.subjectId}|${row.majorQuestion}`))].map((key) => {
+    const [rowSubjectId, majorQuestion] = key.split("|");
+    const questionRows = rows.filter((row) => row.subjectId === rowSubjectId && String(row.majorQuestion) === majorQuestion);
+    return { subjectId: rowSubjectId, majorQuestion: Number(majorQuestion), count: questionRows.length, correctRate: round(questionRows.filter((row) => row.result === "correct").length / questionRows.length * 100), blankRate: round(questionRows.filter((row) => row.result === "blank").length / questionRows.length * 100), partialRate: round(questionRows.filter((row) => row.result === "partial").length / questionRows.length * 100) };
+  }).sort((a, b) => a.correctRate - b.correctRate);
+  return { count: rows.length, parts, questions };
+}
+
+function targetSummary(data, people, events) {
+  const personIds = new Set(people.map((item) => item.personId));
+  const eventIds = new Set(events.map((item) => item.id));
+  const rows = data.targets.filter((row) => personIds.has(row.personId) && eventIds.has(row.eventId) && row.preferenceOrder === 1);
+  const latestEvent = [...events].reverse().find((event) => rows.some((row) => row.eventId === event.id));
+  const latest = rows.filter((row) => row.eventId === latestEvent?.id);
   return {
-    filters: normalized,
-    students,
-    suppressed: students.length > 0 && students.length < normalized.suppressionThreshold,
-    overview: { students: students.length, observations: activeRows.length, missingCount: activeRows.filter((item) => item.missingReason).length, rate: summarize(rates), histogram: histogram(rates) },
-    comparison: comparison(data, students, normalized.subjectId),
-    subjects: subjectSummary(data, students),
-    groups: groupSummary(data, students, normalized),
-    domains: domainSummary(data, students, normalized),
-    targets: targetSummary(data, students),
-    answers: answerSummary(data, students),
-    individual: individualSummary(data, students, normalized.subjectId, normalized.personId),
-    quality: { active: data.reports.filter((item) => item.status === "ACTIVE").length, pending: data.reports.filter((item) => item.status === "PENDING").length, superseded: data.reports.filter((item) => item.status === "SUPERSEDED").length },
+    sampleCount: latest.length,
+    counts: ["A", "B", "C", "D", "E"].map((label) => ({ label, count: latest.filter((row) => row.judgement === label).length })),
+    borderGap: summarize(latest.map((row) => row.borderGap)),
+    groups: [...new Set(latest.map((row) => row.targetLabel))].map((label) => { const groupRows = latest.filter((row) => row.targetLabel === label); return { label, count: groupRows.length, borderGap: round(mean(groupRows.map((row) => row.borderGap))), aToC: groupRows.filter((row) => ["A", "B", "C"].includes(row.judgement)).length }; }).sort((a, b) => b.count - a.count),
+  };
+}
+
+function registrationSummary(data, people, events) {
+  const personIds = new Set(people.map((item) => item.personId));
+  const eventIds = new Set(events.map((item) => item.id));
+  const reports = data.reports.filter((row) => (!row.personId || personIds.has(row.personId)) && eventIds.has(row.eventId));
+  const progress = data.expectedByEventLocation.filter((row) => eventIds.has(row.eventId) && (row.locationId === "all" || people.some((person) => person.locationId === row.locationId)));
+  return { active: reports.filter((row) => row.status === "ACTIVE").length, pending: reports.filter((row) => row.status === "PENDING").length, superseded: reports.filter((row) => row.status === "SUPERSEDED").length, progress };
+}
+
+function individualSummary(data, people, events, requestedPersonId) {
+  const person = people.find((item) => item.personId === requestedPersonId) ?? people[0] ?? null;
+  if (!person) return null;
+  const byEvent = eventSummary(data, [person], events, "all");
+  const latest = events.at(-1);
+  const subjectRows = getRows(data, [person], latest ? [latest] : [], "all").filter((row) => row.scoreRate !== null);
+  const targets = data.targets.filter((row) => row.personId === person.personId && row.eventId === latest?.id);
+  return { person, byEvent, subjects: subjectRows.map((row) => ({ ...row, label: data.subjectDefinitions.find((item) => item.id === row.subjectId)?.label ?? row.subjectId })).sort((a, b) => b.scoreRate - a.scoreRate), targets };
+}
+
+export function createDemoModel(data, input = {}) {
+  const filters = { locationId: "all", schoolId: "all", grade: "all", definitionId: "all", eventIds: [], subjectId: "all", suppressionThreshold: 5, personId: null, ...input };
+  const people = cohort(data, filters);
+  const events = selectedEvents(data, filters);
+  const eventIds = new Set(events.map((item) => item.id));
+  const activeRows = getRows(data, people, events, filters.subjectId).filter((row) => row.scoreRate !== null);
+  const latest = events.at(-1);
+  const latestValues = people.map((person) => { const rows = getRows(data, [person], latest ? [latest] : [], filters.subjectId); return filters.subjectId === "all" ? studentRate(rows) : rows.find((row) => row.scoreRate !== null)?.scoreRate ?? null; }).filter((value) => value !== null);
+  return {
+    filters, people, events,
+    scope: { students: people.length, events: events.length, observations: activeRows.length, latest: latest?.label ?? "対象なし", missing: getRows(data, people, events, filters.subjectId).filter((row) => row.missingReason).length, rate: summarize(latestValues) },
+    eventSummary: eventSummary(data, people, events, filters.subjectId), subjects: subjectSummary(data, people, events), comparison: comparisonSummary(data, people, events, filters.subjectId), groups: groupSummary(data, people, events, filters.subjectId, filters.suppressionThreshold), domains: domainSummary(data, people, events, filters.subjectId), answers: answerSummary(data, people, events, filters.subjectId), targets: targetSummary(data, people, events), registration: registrationSummary(data, people, events), individual: individualSummary(data, people, events, filters.personId), suppressed: people.length > 0 && people.length < filters.suppressionThreshold,
+    dataQuality: { schemaVersions: [...new Set(data.reports.filter((row) => eventIds.has(row.eventId)).map((row) => row.schemaVersion))], sourceCapabilities: data.sourceCapabilities },
   };
 }
 
 export function createMlDemoRows(data, model) {
-  const people = new Map(model.students.map((item, index) => [item.personId, `demo_ml_${String(index + 1).padStart(3, "0")}`]));
-  return data.scores.filter((item) => people.has(item.personId) && item.eventId === data.meta.activeEventId && (model.filters.subjectId === "all" || item.subjectId === model.filters.subjectId)).map((item) => ({
-    ExportSchemaVersion: "ml-export.v1-demo",
-    ML_ID: people.get(item.personId),
-    ExamEventID: item.eventId,
-    LocationID: item.locationId,
-    SubjectDefinitionID: item.subjectId,
-    Score: item.score,
-    MaxScore: item.maxScore,
-    ScoreRate: item.scoreRate,
-    Deviation: item.deviation,
-    AbilityLevel: item.abilityLevel,
-    MissingReason: item.missingReason,
-  }));
+  const people = new Map(model.people.map((item, index) => [item.personId, `demo_ml_${String(index + 1).padStart(3, "0")}`]));
+  const personDetails = new Map(model.people.map((item) => [item.personId, item]));
+  const eventIds = new Set(model.events.map((item) => item.id));
+  return data.scores.filter((row) => people.has(row.personId) && eventIds.has(row.eventId) && (model.filters.subjectId === "all" || row.subjectId === model.filters.subjectId)).map((row) => ({ ExportSchemaVersion: "ml-export.v2-demo", ML_ID: people.get(row.personId), ExamEventID: row.eventId, LocationID: personDetails.get(row.personId).locationId, SchoolID: personDetails.get(row.personId).schoolId, SubjectDefinitionID: row.subjectId, Score: row.score, MaxScore: row.maxScore, ScoreRate: row.scoreRate, Deviation: row.deviation, AbilityLevel: row.abilityLevel, MissingReason: row.missingReason }));
 }
