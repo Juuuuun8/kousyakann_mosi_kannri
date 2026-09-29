@@ -52,8 +52,14 @@ function insights(model) {
   const registrationTotal = model.registration.progress.reduce((sum, row) => sum + row.expected, 0);
   const registered = model.registration.progress.reduce((sum, row) => sum + row.registered, 0);
   const items = [];
-  if (weakSubject) items.push(`<li><span class="insight-icon down">↓</span><div><strong>${escapeHtml(weakSubject.label)}は全国平均より${Math.abs(weakSubject.nationalGap).toFixed(1)}pt低い</strong><p>最新回・受験者${weakSubject.sampleCount}人の集計です。原因は自動判定していません。</p></div><button data-open-tab="subjects" data-subject="${weakSubject.id}" type="button">詳しく見る</button></li>`);
-  if (weakDomain) items.push(`<li><span class="insight-icon">◇</span><div><strong>${escapeHtml(weakDomain.label)}は同学力帯より${Math.abs(weakDomain.sameAbilityGap).toFixed(1)}pt低い</strong><p>教科全体では見えにくい分野差です。</p></div><button data-open-tab="subjects" data-subject="${weakDomain.subjectId}" type="button">設問まで見る</button></li>`);
+  if (weakSubject) {
+    const finding = weakSubject.nationalGap < 0 ? `全国平均を${Math.abs(weakSubject.nationalGap).toFixed(1)}pt下回る` : `全国平均との差が最も小さい（${pt(weakSubject.nationalGap)}）`;
+    items.push(`<li><span class="insight-icon down">↓</span><div><strong>${escapeHtml(weakSubject.label)}は${finding}</strong><p>最新回・受験者${weakSubject.sampleCount}人の集計です。原因は自動判定していません。</p></div><button data-open-tab="subjects" data-subject="${weakSubject.id}" type="button">詳しく見る</button></li>`);
+  }
+  if (weakDomain) {
+    const finding = weakDomain.sameAbilityGap < 0 ? `同学力帯を${Math.abs(weakDomain.sameAbilityGap).toFixed(1)}pt下回る` : `同学力帯との差が最も小さい（${pt(weakDomain.sameAbilityGap)}）`;
+    items.push(`<li><span class="insight-icon">◇</span><div><strong>${escapeHtml(weakDomain.label)}は${finding}</strong><p>教科全体では見えにくい分野差です。</p></div><button data-open-tab="subjects" data-subject="${weakDomain.subjectId}" type="button">設問まで見る</button></li>`);
+  }
   if (model.comparison.comparableCount) items.push(`<li><span class="insight-icon up">↗</span><div><strong>前回比3pt以上の上昇が${model.comparison.improved}人</strong><p>同じ生徒・同じ形式の共通テスト模試2回を比較しています。</p></div><button data-open-tab="compare" type="button">変化を比較</button></li>`);
   if (registrationTotal) items.push(`<li><span class="insight-icon">✓</span><div><strong>成績表の登録は${registered}/${registrationTotal}件</strong><p>未登録や確認中の校舎を一覧で確認できます。</p></div><button data-open-tab="registration" type="button">登録状況へ</button></li>`);
   return `<section class="card span-2"><div class="section-heading"><div><p class="overline">まず確認</p><h2>注目したい変化</h2></div><span class="help-text">事実だけを表示</span></div><ul class="insight-list">${items.join("")}</ul></section>`;
@@ -95,6 +101,7 @@ function subjects(model) {
 }
 
 function targets(model) {
+  if (!model.targets.sampleCount) return notice("この条件では志望校判定を表示できません", "志望校判定を含む共通テスト模試を表示期間に加えてください。", "warn");
   const total = model.targets.sampleCount || 1;
   return `<div class="judgement-grid">${model.targets.counts.map((item) => `<article class="judgement ${item.label.toLowerCase()}"><span>${item.label}判定</span><strong>${item.count}人</strong><small>${Math.round(item.count / total * 100)}%</small></article>`).join("")}</div><div class="content-grid"><section class="card"><div class="section-heading"><div><p class="overline">第1志望</p><h2>ボーダーまでの差</h2></div><span class="count-chip">${model.targets.sampleCount}人</span></div><div class="big-number ${model.targets.borderGap.mean >= 0 ? "positive" : "negative"}">${pt(model.targets.borderGap.mean)}</div><p class="center-note">中央値 ${pt(model.targets.borderGap.median)} ／ 中央50%は ${pt(model.targets.borderGap.p25)}～${pt(model.targets.borderGap.p75)}</p></section><section class="card span-2"><div class="section-heading"><div><p class="overline">志望先別</p><h2>人数・判定・ボーダー差</h2></div></div><div class="table-wrap"><table><thead><tr><th>志望先</th><th>人数</th><th>A～C判定</th><th>平均ボーダー差</th></tr></thead><tbody>${model.targets.groups.map((group) => `<tr><td>${escapeHtml(group.label)}</td><td>${group.count}人</td><td>${group.aToC}人</td><td class="${group.borderGap >= 0 ? "positive" : "negative"}">${pt(group.borderGap)}</td></tr>`).join("")}</tbody></table></div></section><section class="card span-2">${notice("判定だけで結論を出さない", "志望順位、募集定員、志望者内順位、ボーダー差、教科別の差を合わせて確認できます。次に誰へ何を指導するかは担当者が判断します。")}</section></div>`;
 }
