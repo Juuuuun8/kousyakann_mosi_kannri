@@ -10,7 +10,7 @@
   <body class="dashboard-page">
     <a class="skip-link" href="#app">分析内容へ移動</a>
     <header class="topbar">
-      <a class="brand" href="./dashboard.html" aria-label="模試成績管理 ホーム">
+      <a class="brand" href="./index.html" aria-label="模試成績管理 ホーム">
         <span class="brand-mark" aria-hidden="true">成</span>
         <span><strong>模試成績管理</strong><small>全校舎の状況をひとつに</small></span>
       </a>
@@ -46,7 +46,7 @@
           <div class="filter-grid">
             <label>模試の種類<select id="definition-filter"><option value="all">すべての模試</option></select></label>
             <label>表示期間<select id="period-filter"><option value="all">登録済みの全期間</option><option value="latest-3">直近3回</option><option value="latest">最新回だけ</option></select></label>
-            <label>校舎<select id="location-filter"><option value="all">全校舎</option></select></label>
+            <fieldset class="location-field"><legend>比較する校舎</legend><div id="location-filter" class="location-checks"></div><button id="select-all-locations" class="mini-button" type="button">全校舎を選ぶ</button></fieldset>
             <label>高校<select id="school-filter"><option value="all">全高校</option></select></label>
             <label>学年<select id="grade-filter"><option value="all">全学年</option><option>高3</option><option>高2</option></select></label>
             <label>教科<select id="subject-filter"><option value="all">全教科</option></select></label>
