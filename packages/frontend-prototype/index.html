@@ -24,35 +24,38 @@
 
     <div class="app-layout">
       <nav class="side-nav" aria-label="主な機能" role="tablist">
-        <p class="nav-heading">分析</p>
-        <button class="nav-item is-active" data-tab="overview" role="tab" aria-selected="true" aria-controls="app"><span aria-hidden="true">⌂</span>現在地</button>
-        <button class="nav-item" data-tab="compare" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">⇄</span>比較</button>
-        <button class="nav-item" data-tab="subjects" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">▦</span>教科・設問</button>
-        <button class="nav-item" data-tab="targets" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">◎</span>志望校</button>
-        <button class="nav-item" data-tab="individual" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">○</span>生徒</button>
-        <p class="nav-heading">管理</p>
-        <button class="nav-item" data-tab="registration" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">✓</span>登録状況</button>
-        <button class="nav-item" data-tab="ml" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">↓</span>ML用出力</button>
+        <p class="nav-heading">目的から選ぶ</p>
+        <button class="nav-item is-active" data-tab="overview" role="tab" aria-selected="true" aria-controls="app"><span aria-hidden="true">⌂</span>状況をつかむ</button>
+        <button class="nav-item" data-tab="compare" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">⇄</span>集団を比べる</button>
+        <button class="nav-item" data-tab="individual" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">○</span>生徒を探す</button>
+        <button class="nav-item" data-tab="targets" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">◎</span>志望校を確かめる</button>
+        <details class="admin-nav">
+          <summary>管理機能</summary>
+          <button class="nav-item" data-tab="registration" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">✓</span>登録・取込状況</button>
+          <button class="nav-item" data-tab="ml" role="tab" aria-selected="false" aria-controls="app" tabindex="-1"><span aria-hidden="true">↓</span>ML用出力</button>
+        </details>
       </nav>
 
       <main class="main-content">
         <section class="page-intro">
-          <div><p class="overline">分析ダッシュボード</p><h1 id="page-title">現在地</h1><p id="page-description">全校舎の最新状況と、前回からの変化を確認できます。</p></div>
+          <div><p class="overline">分析ダッシュボード</p><h1 id="page-title">状況をつかむ</h1><p id="page-description">全校舎の最新状況と、前回からの変化を確認できます。</p></div>
           <span id="dataset-version" class="version-chip">読込中</span>
         </section>
 
         <details class="filter-panel" open>
           <summary><span><strong>表示するデータ</strong><small id="scope-summary">架空データを読み込んでいます</small></span><span class="summary-action">条件を変更</span></summary>
           <div class="filter-grid">
-            <label>模試の種類<select id="definition-filter"><option value="all">すべての模試</option></select></label>
+            <label>模試の種類<select id="definition-filter"></select></label>
             <label>表示期間<select id="period-filter"><option value="all">登録済みの全期間</option><option value="latest-3">直近3回</option><option value="latest">最新回だけ</option></select></label>
             <fieldset class="location-field"><legend>比較する校舎</legend><div id="location-filter" class="location-checks"></div><button id="select-all-locations" class="mini-button" type="button">全校舎を選ぶ</button></fieldset>
             <label>高校<select id="school-filter"><option value="all">全高校</option></select></label>
             <label>学年<select id="grade-filter"><option value="all">全学年</option><option>高3</option><option>高2</option></select></label>
-            <label>教科<select id="subject-filter"><option value="all">全教科</option></select></label>
+            <label>比較する指標<select id="subject-filter"></select></label>
             <button id="reset-filters" class="text-button" type="button">条件を元に戻す</button>
           </div>
         </details>
+
+        <section id="context-bar" class="context-bar" aria-label="現在の表示条件"></section>
 
         <section id="app" role="tabpanel" aria-live="polite" tabindex="0"></section>
         <p class="demo-notice">このデモは架空データのみを使用しています。数値・学校名・志望先は実在の情報ではありません。</p>
