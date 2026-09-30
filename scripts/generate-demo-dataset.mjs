@@ -15,12 +15,12 @@ const schoolNames = ["北星高校", "中央高校", "旭丘高校", "河畔高�
 const schools = schoolNames.map((label, index) => ({ id: `school.${index + 1}`, label, locationId: locations[Math.floor(index / 2)].id }));
 const examDefinitions = [{ id: "kawai.ct", label: "全統共通テスト模試", sourceStatus: "ATTACHED_PDF_CONFIRMED" }];
 const examEvents = [
-  ["ct.2025.1", 2025, 1, "2025年度 第1回 全統共通テスト模試", "25年 共テ①", "2025-05-04"],
-  ["ct.2025.2", 2025, 2, "2025年度 第2回 全統共通テスト模試", "25年 共テ②", "2025-08-10"],
-  ["ct.2025.3", 2025, 3, "2025年度 第3回 全統共通テスト模試", "25年 共テ③", "2025-10-05"],
-  ["ct.2026.1", 2026, 1, "2026年度 第1回 全統共通テスト模試", "26年 共テ①", "2026-05-03"],
-  ["ct.2026.2", 2026, 2, "2026年度 第2回 全統共通テスト模試", "26年 共テ②", "2026-08-09"],
-].map(([id, year, round, label, shortLabel, examDate]) => ({ id, definitionId: "kawai.ct", year, round, label, shortLabel, examDate }));
+  ["ct.2025.1", 2025, 1, "2025年度 第1回 全統共通テスト模試", "25年 共テ①"],
+  ["ct.2025.2", 2025, 2, "2025年度 第2回 全統共通テスト模試", "25年 共テ②"],
+  ["ct.2025.3", 2025, 3, "2025年度 第3回 全統共通テスト模試", "25年 共テ③"],
+  ["ct.2026.1", 2026, 1, "2026年度 第1回 全統共通テスト模試", "26年 共テ①"],
+  ["ct.2026.2", 2026, 2, "2026年度 第2回 全統共通テスト模試", "26年 共テ②"],
+].map(([id, year, round, label, shortLabel]) => ({ id, definitionId: "kawai.ct", year, round, label, shortLabel }));
 
 const subjectDefinitions = [
   ["english-reading", "英語リーディング", "英語R", 100, 61, false], ["english-listening", "英語リスニング", "英語L", 100, 58, false],
