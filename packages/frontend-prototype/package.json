@@ -4,6 +4,6 @@
   "version": "0.6.0",
   "type": "module",
   "scripts": {
-    "test": "node --experimental-strip-types --test test/static.test.mjs"
+    "test": "node --experimental-strip-types --test test/*.test.mjs"
   }
 }

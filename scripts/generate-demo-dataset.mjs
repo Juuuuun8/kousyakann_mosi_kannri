@@ -30,7 +30,7 @@ const subjectDefinitions = [
   ["chemistry", "化学", "化学", 100, 53, false], ["physics", "物理", "物理", 100, 55, false],
   ["geography", "地理", "地理", 100, 58, false], ["information-1", "情報Ⅰ", "情報Ⅰ", 100, 64, false],
   ["overall-6-8", "国理6-8型総合", "6-8型", 1000, 58, true], ["overall-science", "理系総合", "理系総合", 900, 57, true],
-].map(([id, label, shortLabel, maxScore, nationalAverage, aggregate], order) => ({ id, label, shortLabel, maxScore, nationalAverage, aggregate, comparisonEligible: true, order, sourceStatus: "ATTACHED_PDF_CONFIRMED" }));
+].map(([id, label, shortLabel, maxScore, nationalAverage, aggregate], order) => ({ id, label, shortLabel, maxScore, nationalAverage, aggregate, metricDefinitionId: `metric.${id}.summary.v1`, comparisonEligible: true, order, sourceStatus: "ATTACHED_PDF_CONFIRMED" }));
 
 const domainLabels = {
   "english-reading": ["読解－メール", "読解－情報", "読解－物語", "読解表現融合", "読解－図表", "読解－論説", "読解－広告", "読解－複数資料"],
@@ -43,7 +43,7 @@ const domainLabels = {
   physics: ["小問集合", "力学", "波", "電磁気"],
   geography: ["資源問題", "地域調査", "自然と災害", "農業と食料", "都市問題", "環太平洋地誌"],
 };
-const domainDefinitions = Object.entries(domainLabels).flatMap(([subjectId, labels]) => labels.map((label, index) => ({ id: `${subjectId}.${index + 1}`, subjectId, label, order: index, sourceStatus: "ATTACHED_PDF_CONFIRMED" })));
+const domainDefinitions = Object.entries(domainLabels).flatMap(([subjectId, labels]) => labels.map((label, index) => ({ id: `${subjectId}.${index + 1}`, subjectId, label, version: 1, order: index, sourceStatus: "ATTACHED_PDF_CONFIRMED" })));
 const targetDefinitions = [
   ["hokkai", "北海総合大学", "総合政策学部"], ["sapporo", "札幌未来大学", "データ科学部"], ["do-o", "道央教育大学", "教育学部"],
   ["north-tech", "北日本工科大学", "工学部"], ["hakodate", "函館国際大学", "国際学部"], ["tokachi", "十勝生命大学", "生命科学部"],
@@ -72,7 +72,7 @@ for (const [studentIndex, student] of students.entries()) {
   for (const [eventIndex, event] of examEvents.entries()) {
     const pending = (studentIndex + eventIndex * 7) % 37 === 0;
     const reportId = `report.${studentIndex + 1}.${eventIndex + 1}`;
-    reports.push({ reportId, personId: student.personId, eventId: event.id, locationId: student.locationId, status: pending ? "PENDING" : "ACTIVE", completeness: pending ? .25 : 1, schemaVersion: "kawai.ct.v2" });
+    reports.push({ reportId, personId: student.personId, eventId: event.id, locationId: student.locationId, schoolId: student.schoolId, grade: student.grade, identityStatus: student.identityStatus, status: pending ? "PENDING" : "ACTIVE", completeness: pending ? .25 : 1, schemaVersion: "kawai.ct.v2" });
     if (pending) continue;
     const personRows = [];
     for (const [subjectIndex, subject] of directSubjects.entries()) {
@@ -122,14 +122,15 @@ for (const [studentIndex, student] of students.entries()) for (const event of ex
   const personScores = scores.filter((row) => row.personId === student.personId && row.eventId === event.id && row.scoreRate !== null && !subjectDefinitions.find((item) => item.id === row.subjectId).aggregate);
   if (!personScores.length) continue;
   const overall = personScores.reduce((sum, row) => sum + row.scoreRate, 0) / personScores.length;
-  for (let preferenceOrder = 1; preferenceOrder <= 3; preferenceOrder += 1) {
+  for (let preferenceOrder = 1; preferenceOrder <= 7; preferenceOrder += 1) {
     const definition = targetDefinitions[(studentIndex + preferenceOrder - 1) % targetDefinitions.length];
     const allEFixtureOffset = studentIndex % 18 === 0 ? 18 : 0;
     const border = 52 + ((studentIndex + preferenceOrder * 5) % 20) + allEFixtureOffset;
     const borderGap = round1(overall - border);
     const judgement = borderGap >= 8 ? "A" : borderGap >= 2 ? "B" : borderGap >= -5 ? "C" : borderGap >= -12 ? "D" : "E";
     const schedule = preferenceOrder === 1 ? "前期" : "一般";
-    targets.push({ personId: student.personId, eventId: event.id, preferenceOrder, targetId: definition.id, universityId: definition.universityId, facultyId: definition.facultyId, programId: definition.programId, admissionMethodId: `admission.${definition.id}.${schedule}`, targetLabelRaw: definition.label, targetLabel: definition.label, schedule, judgement, borderGap, capacity: 40 + preferenceOrder * 20, rank: 1 + ((studentIndex * 13 + preferenceOrder * 7) % 260), population: 280 });
+    // Fabricated score-point gaps and printed-judgment fixtures, NOT a real admission algorithm.
+    targets.push({ personId: student.personId, eventId: event.id, preferenceOrder, targetId: definition.id, universityId: definition.universityId, facultyId: definition.facultyId, programId: definition.programId, admissionMethodId: `admission.${definition.id}.${schedule}`, targetLabelRaw: definition.label, targetLabel: definition.label, schedule, judgement, borderGap, borderGapUnit: "SCORE_POINT", capacity: 40 + preferenceOrder * 20, rank: 1 + ((studentIndex * 13 + preferenceOrder * 7) % 260), population: 280 });
   }
 }
 
@@ -144,8 +145,14 @@ for (const [studentIndex, student] of students.entries()) for (const event of ex
   answers.push({ personId: student.personId, eventId: event.id, subjectId: domain.subjectId, domainId: domain.id, majorQuestion: question, questionNumber: question, result });
 }
 
+// Explicit report ownership prevents corrections and pending reports leaking into analysis.
+const activeReports = new Map(reports.filter((row) => row.status === "ACTIVE").map((row) => [`${row.personId}|${row.eventId}`, row.reportId]));
+for (const collection of [scores, domains, targets, answers]) for (const row of collection) row.reportId = activeReports.get(`${row.personId}|${row.eventId}`);
+for (const row of scores) row.metricDefinitionId = subjectDefinitions.find((subject) => subject.id === row.subjectId).metricDefinitionId;
+for (const row of domains) row.domainDefinitionVersion = domainDefinitions.find((domain) => domain.id === row.domainId).version;
+
 const dataset = {
-  meta: { datasetVersion: "demo-sheet.v4", generatedAt: "2026-09-30T00:00:00Z", title: "模試成績管理 架空デモデータ", notice: "すべて架空データです。実在の生徒・学校・成績とは関係ありません。", activeEventId: "ct.2026.2", baselineEventId: "ct.2026.1", defaultComparisonSubjectId: "overall-core", supportedScope: "添付PDFで確認済みの河合塾・全統共通テスト模試のみ" },
+  meta: { datasetVersion: "demo-sheet.v5", generatedAt: "2026-10-03T00:00:00Z", title: "模試成績管理 架空デモデータ", notice: "すべて架空データです。実在の生徒・学校・成績とは関係ありません。", activeEventId: "ct.2026.2", baselineEventId: "ct.2026.1", defaultComparisonSubjectId: "overall-core", supportedScope: "添付PDF1件で確認済みの河合塾・全統共通テスト模試のみ。各回の数値・日程・判定は架空で、実帳票の追加対応を意味しません。" },
   sourceCapabilities: { parserStatus: "READY", detectionStatus: "MATCH", summaryMetrics: 14, convertedScores: 12, privateEvaluationMetrics: 5, trendRecords: 33, domainResults: 50, targets: 7, answerMarks: 477 },
   capabilityProfiles: [{ schemaVersion: "kawai.ct.v2", examDefinitionId: "kawai.ct", supports: { subjectScores: true, deviation: true, ranks: true, trends: true, domains: true, answerMarks: true, targets: true }, sourceStatus: "ATTACHED_PDF_CONFIRMED" }],
   followUpRules: { version: "demo-follow-up.v1", changeBandThreshold: 3, scoreRateDeclineThreshold: -5, targetPreferenceOrders: [1, 2, 3], targetJudgements: ["E"], targetMode: "ALL", editableBy: "ADMIN", labels: { decline: "前回比が5pt以上低い", targets: "第1～第3志望がすべてE判定" } },
@@ -160,4 +167,4 @@ const dataset = {
 
 await mkdir(path.dirname(output), { recursive: true });
 await writeFile(output, JSON.stringify(dataset), "utf8");
-process.stdout.write(`Generated demo-sheet.v4: ${students.length} students, ${scores.length} scores, ${domains.length} domains, ${answers.length} answers\n`);
+process.stdout.write(`Generated demo-sheet.v5: ${students.length} students, ${scores.length} scores, ${domains.length} domains, ${answers.length} answers\n`);

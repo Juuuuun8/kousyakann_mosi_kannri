@@ -94,11 +94,11 @@ test("ML export requires purpose and explicit handling confirmation", async () =
   assert.match(app, /用途を限定し、適切に保存し、不要になったら削除/u);
 });
 
-test("demo v4 uses only attached-PDF-confirmed exam fields and supports safe comparison drill-down", async () => {
+test("demo v5 uses only attached-PDF-confirmed exam fields and supports safe comparison drill-down", async () => {
   const dataset = JSON.parse(await text("data/demo-dataset.json"));
   const app = await text("src/app.js");
   const generator = await text("../../scripts/generate-demo-dataset.mjs");
-  assert.equal(dataset.meta.datasetVersion, "demo-sheet.v4");
+  assert.equal(dataset.meta.datasetVersion, "demo-sheet.v5");
   assert.equal(dataset.students.length, 72);
   assert.equal(dataset.examEvents.length, 5);
   assert.equal(dataset.examDefinitions.length, 1);
@@ -126,7 +126,7 @@ test("demo v4 uses only attached-PDF-confirmed exam fields and supports safe com
   assert.equal(all.selectedMetric.id, "overall-core");
   assert.equal(all.studentList.length, 72);
   assert.equal(all.targets.sampleCount > all.targets.studentCount, true);
-  assert.equal(all.targets.byPreference.length, 3);
+  assert.equal(all.targets.byPreference.length, 7);
 
   const english = createDemoModel(dataset, { subjectId: "english-reading", suppressionThreshold: 5 });
   assert.equal(english.answers.count > 0, true);

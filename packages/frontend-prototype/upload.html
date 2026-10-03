@@ -9,22 +9,23 @@
   </head>
   <body>
     <header class="topbar">
-      <a class="brand" href="./index.html"><span class="brand-mark" aria-hidden="true">成</span><span><strong>模試成績管理</strong><small>成績PDFの登録</small></span></a>
-      <div class="topbar-actions"><span class="user-badge">登録担当</span><a class="header-link" href="./index.html">分析へ戻る</a></div>
+      <a class="brand" href="./dashboard.html"><span class="brand-mark" aria-hidden="true">成</span><span><strong>模試成績管理</strong><small>成績PDFの登録</small></span></a>
+      <div class="topbar-actions"><span class="demo-badge">架空データ</span><span class="user-badge">管理者</span><a class="header-link" href="./dashboard.html">分析へ戻る</a></div>
     </header>
     <main class="upload-shell">
       <section class="panel" aria-labelledby="upload-title">
         <div class="panel-heading"><div><p class="overline">1. 登録する成績表</p><h2 id="upload-title">校舎とPDFを選択</h2></div><span class="status warning">デモでは登録しません</span></div>
         <div class="upload-grid">
-          <label>登録校舎<select id="location" required><option value="">選択してください</option><option value="loc.synthetic.1">合成校舎A</option><option value="loc.synthetic.2">合成校舎B</option></select></label>
+          <label>登録校舎<select id="location" required><option value="">選択してください</option><option value="loc.sapporo">札幌駅前校</option><option value="loc.asahikawa">旭川校</option><option value="loc.obihiro">帯広校</option><option value="loc.hakodate">函館校</option></select></label>
           <label class="file-picker">成績PDF<input id="pdf-file" type="file" accept="application/pdf,.pdf"><span>PDFを選択</span></label>
         </div>
         <p class="privacy-line">PDF本体と抽出全文はブラウザメモリ内だけで扱い、ネットワーク送信・Web Storage保存・ファイル名表示を行いません。</p>
       </section>
       <section class="panel" aria-labelledby="check-title">
         <div class="panel-heading"><div><p class="overline">2. 内容の確認</p><h2 id="check-title">対応する成績表か確認</h2></div><span id="file-state" class="status">未選択</span></div>
-        <div id="upload-message" class="notice"><div class="notice-icon" aria-hidden="true">i</div><div><h3>対応帳票を確認します</h3><p>初期対象は河合塾・全統共通テスト模試です。未知スキーム、画像のみ、必須ページ不足は推測登録せず停止します。</p></div></div>
-        <dl class="verification-list"><div><dt>校舎</dt><dd id="location-result">未選択</dd></div><div><dt>ファイル形式</dt><dd id="type-result">未確認</dd></div><div><dt>SHA-256</dt><dd id="hash-result">未計算</dd></div><div><dt>Parser / Schema</dt><dd>未接続のため登録不可</dd></div></dl>
+        <div id="upload-message" class="notice" role="status" aria-live="polite"><div class="notice-icon" aria-hidden="true">i</div><div><h3>登録機能は本番未接続です</h3><p>この公開デモではPDFの形式確認のみ行い、成績の解析・送信・登録は行いません。初期対応予定は河合塾・全統共通テスト模試です。</p></div></div>
+        <dl class="verification-list"><div><dt>校舎</dt><dd id="location-result">未選択</dd></div><div><dt>ファイル形式</dt><dd id="type-result">未確認</dd></div></dl>
+        <details><summary>管理者向けの確認情報</summary><dl class="verification-list"><div><dt>重複確認用識別値</dt><dd id="hash-result">未計算</dd></div><div><dt>帳票解析</dt><dd>未接続のため登録不可</dd></div></dl></details>
         <div class="panel-footer"><button id="clear-file" class="action secondary" type="button">クリア</button><button id="register" class="action" type="button" disabled>確認して登録</button></div>
       </section>
     </main>
